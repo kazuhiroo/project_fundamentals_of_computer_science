@@ -10,9 +10,7 @@ int main()
 
     while (gra.get_working())
     {      
-        
         gra.render();
-
 
         gra.update();
     }

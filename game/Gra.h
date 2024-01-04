@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gra.cpp"
-
+#include "iostream"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -11,17 +11,29 @@
 
 using namespace sf;
 
+
 //Klasa tworz¹ca grê
 
 class Game
 {
 private:
 	
-	//Stworzenie wskaŸnika zawieraj¹cego okno
+	//Stworzenie wskaŸnika zawieraj¹cego okno - dynamiczne zarz¹dzanie gr¹
 	RenderWindow* window;
 	Event event;
+	//Zasoby gry
+	Font font;
 
 
+	
+	//PRYWATNE FUNKCJE GRY
+	
+	//Utworzenie na wskaŸniku okna gry
+	void create_window()
+	{
+		this->window = new RenderWindow(VideoMode(800, 600), "arcade");
+		this->window->setFramerateLimit(144);
+	}
 	//Zdarzenie: zamkniêcie okna X
 	void pollEvents()
 	{
@@ -34,22 +46,24 @@ private:
 			}
 		}
 	}
-
-
-	void create_window()
+	//Wczytanie fontu
+	void game_font()
 	{
-		//Utworzenie na wskaŸniku okna gry
-		this->window = new RenderWindow(VideoMode(800, 600), "arcade");
-		this->window->setFramerateLimit(144);
+		if (this->font.loadFromFile("Fonts/Montserrat-VariableFont_wght.ttf"))
+		{
+			std::cout << "GAME::GAME_FONT::Font uploaded successfully";
+		}
 	}
 	
 public:
-		
+	//Konstruktor/Destruktor
 	Game()
 	{
 		//Konstruktor tworzy okno przy utworzeniu obiektu
 		this->create_window();
+		this->game_font();
 	}
+
 	~Game()
 	{
 		//Destruktor okno spod wskaŸnika
@@ -64,17 +78,17 @@ public:
 	}
 
 
+	//Nowe informacje + render w grze
+	void update()
+	{
+		this->pollEvents();
+	}
+
 	void render()
 	{
 		this->window->clear();
 
 		this->window->display();
-	}
-
-
-	void update()
-	{
-		this->pollEvents();
 	}
 
 };
