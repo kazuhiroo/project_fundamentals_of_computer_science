@@ -31,7 +31,7 @@ private:
 	//Utworzenie na wskaŸniku okna gry
 	void create_window()
 	{
-		this->window = new RenderWindow(VideoMode(800, 600), "arcade");
+		this->window = new RenderWindow(VideoMode(800, 900), "arcade");
 		this->window->setFramerateLimit(144);
 	}
 	//Zdarzenie: zamkniêcie okna X
@@ -49,7 +49,7 @@ private:
 	//Wczytanie fontu
 	void game_font()
 	{
-		if (this->font.loadFromFile("Fonts/Montserrat-VariableFont_wght.ttf"))
+		if (this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf"))
 		{
 			std::cout << "GAME::GAME_FONT::Font uploaded successfully";
 		}
