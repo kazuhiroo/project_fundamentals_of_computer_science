@@ -1,33 +1,20 @@
 #include <iostream>
-
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/System.hpp>
-#include <SFML/Network.hpp>
-#include <SFML/Audio.hpp>
+#include "Gra.h"
 
 using namespace sf;
 
+
 int main()
 {
-    Window window(sf::VideoMode(800, 600), "GRA");
+    Game gra;
 
-    // run the program as long as the window is open
-    while (window.isOpen())
-    {
-        // check all the window's events that were triggered since the last iteration of the loop
-        Event event;
+    while (gra.get_working())
+    {      
+        
+        gra.render();
 
-        while (window.pollEvent(event))
-        {
-            switch(event.type)
-            case Event::Closed:
-            {
-                window.close();
-                break;
-            }
-            //case... for the future cases
-        }
+
+        gra.update();
     }
 
 
