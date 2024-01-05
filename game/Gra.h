@@ -24,12 +24,11 @@ private:
 
 	//Zmienne
 
-	unsigned int hp;
-
 	Vector2f position;
-	Event r;
 
+	Vector2f pivot;
 
+	float rotation;
 
 	//Funkcje
 
@@ -46,42 +45,73 @@ private:
 public:
 	Character(unsigned int health = 100)
 	{
-		hp = health;
-
+		
 		this->load_texture();
 		this->upload_texture();
 
-
-		this->position = Vector2f(350.0f, 300.0f);
+		//Pozycja startowa postaci
+		this->position = Vector2f(50.0f, 300.0f);
 		this->char_image.setPosition(position);
+
+		//Rotacja startowa postaci
+		this->rotation = 1.f;
+		this->char_image.setRotation(rotation);
+
+		this->pivot = Vector2f(char_image.getLocalBounds().width / 2.0f, char_image.getLocalBounds().height / 2.0f);
+		this->char_image.setOrigin(pivot);
 	}
 
 	~Character()
 	{}
-
+	
 
 
 	//Poruszanie siê gracza arrow keys
+	//Q obrót w prawo
+	//E obrót w lewo
 	void movement()
 	{
-		if (Keyboard::isKeyPressed(Keyboard::Right))
+		
+		//ARROW KEYS MOVEMENT
+		
+		/*
+		if(Keyboard::isKeyPressed(Keyboard::Right))
 		{
-			position.x += 2.f;
+			position.x += 1.f;
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Left))
+		if(Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			position.x += -2.f;
+			position.x += -1.f;
+			
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Down))
+		if(Keyboard::isKeyPressed(Keyboard::Down))
 		{
-			position.y += 2.f;
+			position.y += 1.f;
+			
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Up))
+		if(Keyboard::isKeyPressed(Keyboard::Up))
 		{
-			position.y += -2.f;
+			position.y += -1.f;
+		}
+		*/
+		
+
+		if (Keyboard::isKeyPressed(Keyboard::Q))
+		{
+			rotation += 0.75f;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::E))
+		{
+			rotation -= 0.75f;
 		}
 
+
+		position.x += 0.25f + std::cos(rotation * 3.14 / 180);
+		position.y += 0.f + std::sin(rotation * 3.14 / 180);
+
+		this->char_image.setRotation(rotation);
 		this->char_image.setPosition(position);
+		
 	}
 
 	//Renderowanie postaci gracza w grze
@@ -90,8 +120,6 @@ public:
 		this->movement();
 		obiekt.draw(this->char_image);
 	}
-
-
 };
 
 
@@ -161,11 +189,11 @@ private:
 	{
 		if (this->bg.loadFromFile("Bg/bg.png"))
 		{
-			std::cout << "GAME::RESOURCES::Backgroud uploaded successfully" << std::endl;
+			std::cout << "GAME::RESOURCES::Background uploaded successfully" << std::endl;
 		}
 		if (this->bg.loadFromFile("Bg/bg.png") == false)
 		{
-			std::cout << "GAME::RESOURCES::Backgroud uploading unsuccessful"<< std::endl;
+			std::cout << "GAME::RESOURCES::Background uploading unsuccessful"<< std::endl;
 		}
 	}
 	void create_background()
@@ -180,7 +208,7 @@ public:
 		//Konstruktor tworzy okno przy utworzeniu obiektu
 		this->window = new RenderWindow(VideoMode(800, 600), "Game1");
 		this->window->setFramerateLimit(144);
-
+		this->window->setVerticalSyncEnabled(true);
 
 		this->game_font();
 		this->game_bg();
