@@ -7,7 +7,7 @@ int main()
 {
     Game gra;
 
-    while (gra.get_working())
+    while (gra.get_working() && !gra.get_exit())
     {      
         gra.render();
 
