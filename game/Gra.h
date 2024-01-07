@@ -1,8 +1,13 @@
 #pragma once
 
+
 #include "Gra.cpp"
 #include <iostream>
-
+#include <ctime>
+#include <sstream>
+#include <vector>
+#include <cmath>
+//#include <Windows.h>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -15,21 +20,24 @@
 using namespace sf;
 
 
+
+
+
 class Character
 {
 private:
 	//Zasoby
+
 	Texture image;
 	Sprite char_image;
 
 	//Zmienne
 
 	Vector2f position;
-
 	Vector2f pivot;
 
-	float rotation;
-
+	
+	float rotation = 0;
 	//Funkcje
 
 	void load_texture()
@@ -43,21 +51,21 @@ private:
 	}
 
 public:
-	Character(unsigned int health = 100)
+	Character()
 	{
 		
 		this->load_texture();
 		this->upload_texture();
 
 		//Pozycja startowa postaci
-		this->position = Vector2f(50.0f, 300.0f);
+		this->position = Vector2f(250.0f, 300.0f);
 		this->char_image.setPosition(position);
 
 		//Rotacja startowa postaci
-		this->rotation = 1.f;
+		this->rotation = 0.f;
 		this->char_image.setRotation(rotation);
 
-		this->pivot = Vector2f(char_image.getLocalBounds().width / 2.0f, char_image.getLocalBounds().height / 2.0f);
+		this->pivot = Vector2f(char_image.getLocalBounds().width / 3.0f, char_image.getLocalBounds().height / 2.0f);
 		this->char_image.setOrigin(pivot);
 	}
 
@@ -71,48 +79,62 @@ public:
 	//E obrót w lewo
 	void movement()
 	{
-		
+
 		//ARROW KEYS MOVEMENT
+
 		
-		/*
-		if(Keyboard::isKeyPressed(Keyboard::Right))
-		{
-			position.x += 1.f;
-		}
-		if(Keyboard::isKeyPressed(Keyboard::Left))
-		{
-			position.x += -1.f;
-			
-		}
-		if(Keyboard::isKeyPressed(Keyboard::Down))
-		{
-			position.y += 1.f;
-			
-		}
-		if(Keyboard::isKeyPressed(Keyboard::Up))
-		{
-			position.y += -1.f;
-		}
-		*/
+			if (Keyboard::isKeyPressed(Keyboard::Right))
+			{
+				position.x += 1.f;
+
+
+			}
+			if (Keyboard::isKeyPressed(Keyboard::Left))
+			{
+				position.x += -1.f;
+
+			}
+
+
 		
 
-		if (Keyboard::isKeyPressed(Keyboard::Q))
-		{
-			rotation += 0.75f;
-		}
-		if (Keyboard::isKeyPressed(Keyboard::E))
-		{
-			rotation -= 0.75f;
-		}
+		// TURNING
+			if (Keyboard::isKeyPressed(Keyboard::Q))
+			{
+				rotation += 0.75f;
+			}
+			if (Keyboard::isKeyPressed(Keyboard::E))
+			{
+				rotation -= 0.75f;
+			}
 
 
-		position.x += 0.25f + std::cos(rotation * 3.14 / 180);
-		position.y += 0.f + std::sin(rotation * 3.14 / 180);
-
-		this->char_image.setRotation(rotation);
-		this->char_image.setPosition(position);
+			
+			if (rotation >= -95 && rotation <=95)
+			{
+					position.y += 2*std::sin(rotation * 3.14159 / 180);
+			}
+			else
+			{
+					position.x += -2.f + std::cos(rotation*3.14159 / 180);
+					position.y += std::sin(rotation * 3.14159 / 180);
+			}
+		
+		
+			this->char_image.setRotation(rotation);
+			this->char_image.setPosition(position);
 		
 	}
+
+
+	bool player_on_road()
+	{
+		if (position.y > 450.f || position.y < 150.f || position.x <= 0.f)
+		{
+			return false;
+		}
+	}
+
 
 	//Renderowanie postaci gracza w grze
 	void render(RenderTarget& obiekt)
@@ -126,148 +148,218 @@ public:
 
 
 
-
 class Game
 {
 private:
-	
-	//Stworzenie wskaŸnika zawieraj¹cego okno - dynamiczne zarz¹dzanie gr¹
+
+	//Stworzenie wskaŸnika zawieraj¹cego okno
 	RenderWindow* window;
 	Event event;
-	
+
 	//Gracz
 	Character* gracz;
 
-	//Zasoby gry
+	//Obstacles
+	RectangleShape obstacle;
+	std::vector<RectangleShape> obstacles;
+
+	RectangleShape enemy;
+	std::vector<RectangleShape> enemies;
+
+
+	//Resources
 	Font font;
 	Texture bg;
-	Sprite background;
+	Texture rd;
+	Sprite background_image;
+	//Sprite road_image;
+	Sprite road_image;
+	Vector2f road_position;
+	RectangleShape road;
 
-	//ZMIENNE
+	unsigned int points = 0;
+
 	bool exit = false;
-	
-	
+
+
 	//PRYWATNE FUNKCJE GRY
-
 	
-
-
-
-
-
-	//Zdarzenie: zamkniêcie okna X
-	void pollEvents()
+	void create_obstacle()
 	{
-		while (this->window->pollEvent(this->event))
-		{
+		this->obstacle.setPosition(Vector2f(800.f, static_cast<float>(rand() % 151 - 150)));
 
-			if(this->event.type == Event::Closed)
+		this->obstacle.setFillColor(Color::White);
+		this->obstacle.setOutlineColor(Color::Red);
+		this->obstacle.setOutlineThickness(15.f);
+		this->obstacle.setSize(Vector2f(30.f, 30.f));
+
+
+		this->obstacles.push_back(this->obstacle);
+	}
+	
+	void spawn_obstacle()
+	{
+		//Sleep(4000);
+		this->create_obstacle();
+	}
+	
+	void render_obstacles()
+	{
+		for (auto& e : this->obstacles)
+		{
+			this->window->draw(e);
+		}
+	}
+
+	/**/
+		//OKNO I METODY ZASOBÓW
+
+		//Zdarzenie: okno
+		void pollEvents()
+		{
+			while (this->window->pollEvent(this->event))
 			{
-				this->window->close();
+
+				if (this->event.type == Event::Closed)
+				{
+					this->window->close();
+				}
 			}
 		}
-	}
 
 
-	//Wczytanie fontu
-	void game_font()
-	{
-		if (this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf"))
+		//Wczytanie fontu
+		void game_font()
 		{
-			std::cout << "GAME::RESOURCES::Font uploaded successfully" << std::endl;
+			if (this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf"))
+			{
+				std::cout << "GAME::RESOURCES::Font uploaded successfully" << std::endl;
+			}
+			if (this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf") == false)
+			{
+				std::cout << "GAME::RESOURCES::Font uploading unsuccessful" << std::endl;
+			}
 		}
-		if (this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf" ) == false)
+
+
+		//Wczytanie grafiki i t³a
+
+		void game_rd()
 		{
-			std::cout << "GAME::RESOURCES::Font uploading unsuccessful" << std::endl;
+			this->rd.loadFromFile("Bg/road.png");
+			if (!this->rd.loadFromFile("Bg/road.png"))
+			{
+				std::cout << "GAME::RESOURCES::Road upload failed \n";
+			}
+			if (this->rd.loadFromFile("Bg/road.png"))
+			{
+				std::cout << "GAME::RESOURCES::Road image uploaded succesfully \n";
+			}
 		}
-	}
-
-
-	//Wczytanie grafiki i t³a
-	
-	void game_bg()
-	{
-		if (this->bg.loadFromFile("Bg/bg.png"))
+		void create_road()
 		{
-			std::cout << "GAME::RESOURCES::Background uploaded successfully" << std::endl;
+			this->road_image.setTexture(this->rd);
+			this->road_image.setPosition(Vector2f(0.f, 150.f));
 		}
-		if (this->bg.loadFromFile("Bg/bg.png") == false)
+		void game_bg()
 		{
-			std::cout << "GAME::RESOURCES::Background uploading unsuccessful"<< std::endl;
+			if (this->bg.loadFromFile("Bg/bg.png"))
+			{
+				std::cout << "GAME::RESOURCES::Background uploaded successfully" << std::endl;
+			}
+			if (this->bg.loadFromFile("Bg/bg.png") == false)
+			{
+				std::cout << "GAME::RESOURCES::Background uploading unsuccessful" << std::endl;
+			}
 		}
-	}
-	void create_background()
-	{
-		this->background.setTexture(this->bg);
-	}
-	
-public:
-	//Konstruktor/Destruktor
-	Game()
-	{
-		//Konstruktor tworzy okno przy utworzeniu obiektu
-		this->window = new RenderWindow(VideoMode(800, 600), "Game1");
-		this->window->setFramerateLimit(144);
-		this->window->setVerticalSyncEnabled(true);
-
-		this->game_font();
-		this->game_bg();
-		this->create_background();
+		void create_background()
+		{
+			this->background_image.setTexture(this->bg);
+		}
 
 
-		//Spawn gracza
-		this->gracz = new Character;
+	public:
+		//Konstruktor/Destruktor
+		Game()
+		{
+			//Konstruktor tworzy okno przy utworzeniu obiektu
+			this->window = new RenderWindow(VideoMode(800, 600), "Game1");
+			this->window->setFramerateLimit(144);
+			this->window->setVerticalSyncEnabled(false);
+
+			
+
+			//Upload textures
+			this->game_font();
+			this->game_bg();
+			this->create_background();
+			this->game_rd();
+			this->create_road();
+
+			//Spawn gracza
+			this->gracz = new Character;
+
+		}
+
+		~Game()
+		{
+			//Destruktor okno spod wskaŸnika
+			delete this->window;
+			delete this->gracz;
+		}
 
 
-	
-	}
+		//Informacja zwrotna o dzia³aniu okna
+		 bool get_working()
+		{
+			return this->window->isOpen();
+		}
+		 bool get_exit()
+		{
+			return this->exit;
+		}
 
-	~Game()
-	{
-		//Destruktor okno spod wskaŸnika
-		delete this->window;
-		delete this->gracz;
-	}
+		//Nowe informacje + render w grze
+		void update()
+		{
+			this->pollEvents();
 
+			//Objects spawn
 
-	//Informacja zwrotna o dzia³aniu okna
-	const bool get_working()
-	{
-		return this->window->isOpen();
-	}
-	const bool get_exit()
-	{
-		return this->exit;
-	}
+			if (this->exit == false)
+			{
+				//this->obstacle_spawn();
+				//this->coin_spawn();
+				this->gracz->player_on_road();
+				
+				
+			}
 
-	//Nowe informacje + render w grze
-	void update()
-	{
-		this->pollEvents();
+			//Returning the information if the game is still on
 
-	}
-
-	void render()
-	{
-		this->window->clear();
-
+			if (!this->gracz->player_on_road())
+			{
+				this->exit = true;
+				std::cout << "GAME OVER!" << std::endl << "POINTS: " << this->points;
+			}
 		
 
-		this->window->draw(this->background);
-
-		this->gracz->render(*this->window);
-
-
-
-		this->window->display();
-
+		}
 		
-	
-	}
+		void render()
+		{
+			this->window->clear();
+			
+			this->window->draw(this->background_image);
+			
+			this->window->draw(this->road_image);
 
-};
+			this->gracz->render(*this->window);
 
+			//this->render_obstacles();
 
+			this->window->display();
 
+		}
 
-
+	};
