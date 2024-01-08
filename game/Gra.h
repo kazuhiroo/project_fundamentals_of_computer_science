@@ -7,7 +7,7 @@
 #include <sstream>
 #include <vector>
 #include <cmath>
-//#include <Windows.h>
+
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -16,8 +16,10 @@
 #include <SFML/Audio.hpp>
 
 
-
 using namespace sf;
+
+//Clock clock;
+
 
 
 
@@ -36,7 +38,7 @@ private:
 	Vector2f position;
 	Vector2f pivot;
 
-	
+
 	float rotation = 0;
 	//Funkcje
 
@@ -53,7 +55,7 @@ private:
 public:
 	Character()
 	{
-		
+
 		this->load_texture();
 		this->upload_texture();
 
@@ -71,7 +73,7 @@ public:
 
 	~Character()
 	{}
-	
+
 
 
 	//Poruszanie siê gracza arrow keys
@@ -82,48 +84,48 @@ public:
 
 		//ARROW KEYS MOVEMENT
 
-		
-			if (Keyboard::isKeyPressed(Keyboard::Right))
-			{
-				position.x += 1.f;
+
+		if (Keyboard::isKeyPressed(Keyboard::Right))
+		{
+			position.x += 1.f;
 
 
-			}
-			if (Keyboard::isKeyPressed(Keyboard::Left))
-			{
-				position.x += -1.f;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Left))
+		{
+			position.x += -1.f;
 
-			}
+		}
 
 
-		
+
 
 		// TURNING
-			if (Keyboard::isKeyPressed(Keyboard::Q))
-			{
-				rotation += 0.75f;
-			}
-			if (Keyboard::isKeyPressed(Keyboard::E))
-			{
-				rotation -= 0.75f;
-			}
+		if (Keyboard::isKeyPressed(Keyboard::Q))
+		{
+			rotation += 0.75f;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::E))
+		{
+			rotation -= 0.75f;
+		}
 
 
-			
-			if (rotation >= -95 && rotation <=95)
-			{
-					position.y += 2*std::sin(rotation * 3.14159 / 180);
-			}
-			else
-			{
-					position.x += -2.f + std::cos(rotation*3.14159 / 180);
-					position.y += std::sin(rotation * 3.14159 / 180);
-			}
-		
-		
-			this->char_image.setRotation(rotation);
-			this->char_image.setPosition(position);
-		
+
+		if (rotation >= -95 && rotation <= 95)
+		{
+			position.y += 2 * std::sin(rotation * 3.14159 / 180);
+		}
+		else
+		{
+			position.x += -2.f + std::cos(rotation * 3.14159 / 180);
+			position.y += std::sin(rotation * 3.14159 / 180);
+		}
+
+
+		this->char_image.setRotation(rotation);
+		this->char_image.setPosition(position);
+
 	}
 
 
@@ -148,6 +150,21 @@ public:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class Game
 {
 private:
@@ -163,10 +180,9 @@ private:
 	RectangleShape obstacle;
 	std::vector<RectangleShape> obstacles;
 
-	RectangleShape enemy;
-	std::vector<RectangleShape> enemies;
-
-
+	Time time = Time::Zero;
+	Time spawn_time = seconds(4.f);
+	Clock clock;
 	//Resources
 	Font font;
 	Texture bg;
@@ -178,40 +194,47 @@ private:
 	RectangleShape road;
 
 	unsigned int points = 0;
+	
 
 	bool exit = false;
 
 
-	//PRYWATNE FUNKCJE GRY
-	
-	void create_obstacle()
-	{
-		this->obstacle.setPosition(Vector2f(800.f, static_cast<float>(rand() % 151 - 150)));
+	//PRYWATNE FUNKCJE 
 
-		this->obstacle.setFillColor(Color::White);
+	void set_obstacle()
+	{
+		this->obstacle.setPosition(0.f, static_cast<float>(rand() % static_cast<int>(this->window->getSize().y) - (this->obstacle.getSize().y)));
+
 		this->obstacle.setOutlineColor(Color::Red);
-		this->obstacle.setOutlineThickness(15.f);
-		this->obstacle.setSize(Vector2f(30.f, 30.f));
+		this->obstacle.setSize(Vector2f(35.f, 35.f));
+		this->obstacle.setFillColor(Color::White);
 
+		
+	}
 
-		this->obstacles.push_back(this->obstacle);
-	}
-	
-	void spawn_obstacle()
+	void creating_obstacles()
 	{
-		//Sleep(4000);
-		this->create_obstacle();
-	}
-	
-	void render_obstacles()
-	{
-		for (auto& e : this->obstacles)
+		if (time >= spawn_time)
 		{
-			this->window->draw(e);
+			this->set_obstacle();
+			time = Time::Zero;
+			this->obstacles.push_back(this->obstacle);
 		}
 	}
 
-	/**/
+
+	void render_obstacles()
+	{
+		for (auto& obstacles_objects : this->obstacles)
+		{
+			
+			this->window->draw(obstacles_objects);
+		}
+	}
+
+
+	
+	
 		//OKNO I METODY ZASOBÓW
 
 		//Zdarzenie: okno
@@ -277,6 +300,7 @@ private:
 			this->background_image.setTexture(this->bg);
 		}
 
+		
 
 	public:
 		//Konstruktor/Destruktor
@@ -287,8 +311,6 @@ private:
 			this->window->setFramerateLimit(144);
 			this->window->setVerticalSyncEnabled(false);
 
-			
-
 			//Upload textures
 			this->game_font();
 			this->game_bg();
@@ -298,6 +320,7 @@ private:
 
 			//Spawn gracza
 			this->gracz = new Character;
+			time += clock.restart();
 
 		}
 
@@ -322,13 +345,15 @@ private:
 		//Nowe informacje + render w grze
 		void update()
 		{
+			//time += clock.restart();
+
 			this->pollEvents();
 
 			//Objects spawn
 
 			if (this->exit == false)
 			{
-				//this->obstacle_spawn();
+				this->creating_obstacles();
 				//this->coin_spawn();
 				this->gracz->player_on_road();
 				
@@ -356,10 +381,17 @@ private:
 
 			this->gracz->render(*this->window);
 
-			//this->render_obstacles();
+			this->render_obstacles();
 
 			this->window->display();
 
 		}
 
 	};
+
+
+
+
+
+
+
