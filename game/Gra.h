@@ -126,7 +126,7 @@ public:
 
 		this->char_image.setRotation(rotation);
 		this->char_image.setPosition(position);
-
+		this->get_hitbox();
 	}
 
 	
@@ -232,7 +232,16 @@ private:
 		}
 	}
 	
-
+	void collision()
+	{
+		for (int i = 0; i < obstacles.size(); i++)
+		{
+			if (this->obstacles[i].getGlobalBounds().contains(this->gracz->get_position()))
+			{
+				this->exit = true;
+			}
+		}
+	}
 
 
 
@@ -473,6 +482,7 @@ private:
 				 this->move_obstacles();
 				 this->move_coins();
 				 this->gain_points();
+				 this->collision();
 
 			 }
 
