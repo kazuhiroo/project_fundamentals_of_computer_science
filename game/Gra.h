@@ -18,10 +18,6 @@
 
 using namespace sf;
 
-//Clock clock;
-
-
-
 
 
 
@@ -37,6 +33,7 @@ private:
 
 	Vector2f position;
 	Vector2f pivot;
+	Vector2f hitbox1;
 
 
 	float rotation = 0;
@@ -67,8 +64,12 @@ public:
 		this->rotation = 0.f;
 		this->char_image.setRotation(rotation);
 
-		this->pivot = Vector2f(char_image.getLocalBounds().width / 3.0f, char_image.getLocalBounds().height / 2.0f);
+		this->pivot = Vector2f(char_image.getLocalBounds().width / 3.f, char_image.getLocalBounds().height / 2.f);
 		this->char_image.setOrigin(pivot);
+
+		this->hitbox1 = Vector2f(-char_image.getLocalBounds().width / 3.f, char_image.getLocalBounds().height/2.f);
+		
+
 	}
 
 	~Character()
@@ -88,24 +89,21 @@ public:
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
 			position.x += 1.f;
-
-
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
 			position.x += -1.f;
-
 		}
 
 
 
 
 		// TURNING
-		if (Keyboard::isKeyPressed(Keyboard::Q))
+		if (Keyboard::isKeyPressed(Keyboard::E))
 		{
 			rotation += 0.75f;
 		}
-		if (Keyboard::isKeyPressed(Keyboard::E))
+		if (Keyboard::isKeyPressed(Keyboard::Q))
 		{
 			rotation -= 0.75f;
 		}
@@ -115,11 +113,14 @@ public:
 		if (rotation >= -95 && rotation <= 95)
 		{
 			position.y += 2 * std::sin(rotation * 3.14159 / 180);
+			hitbox1.y += 2 * std::sin(rotation * 3.14159 / 180);
 		}
 		else
 		{
 			position.x += -2.f + std::cos(rotation * 3.14159 / 180);
 			position.y += std::sin(rotation * 3.14159 / 180);
+			hitbox1.y += 2 * std::sin(rotation * 3.14159 / 180);
+			hitbox1.x += -2.f + std::cos(rotation * 3.14159 / 180);
 		}
 
 
@@ -128,15 +129,28 @@ public:
 
 	}
 
-
+	
 	bool player_on_road()
 	{
-		if (position.y > 450.f || position.y < 150.f || position.x <= 0.f)
+		if (hitbox1.y > 240.5f ||  hitbox1.y < -45.5f || position.x <= 0.f)
 		{
 			return false;
 		}
+		else
+		{
+			return true;
+		}
 	}
 
+	Vector2f get_hitbox()
+	{
+		return hitbox1;
+	}
+
+	Vector2f get_position()
+	{
+		return position;
+	}
 
 	//Renderowanie postaci gracza w grze
 	void render(RenderTarget& obiekt)
@@ -145,19 +159,6 @@ public:
 		obiekt.draw(this->char_image);
 	}
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -176,12 +177,22 @@ private:
 	//Gracz
 	Character* gracz;
 
+	//Points
+	CircleShape coin;
+	std::vector<CircleShape> coins;
+
+	float space = 100.f;
+
 	//Obstacles
 	RectangleShape obstacle;
 	std::vector<RectangleShape> obstacles;
+	
+	
+	int num_of_objects = 0;
+	int option;
 
 	Time time = Time::Zero;
-	Time spawn_time = seconds(4.f);
+	Time spawn_time = seconds(1);
 	Clock clock;
 	//Resources
 	Font font;
@@ -193,41 +204,145 @@ private:
 	Vector2f road_position;
 	RectangleShape road;
 
-	unsigned int points = 0;
+
+	unsigned int pts = 0;
 	
+	//end game bool
 
 	bool exit = false;
 
 
-	//PRYWATNE FUNKCJE 
+	//PRIVATE FUNCTIONS
 
-	void set_obstacle()
+	void gain_points()
 	{
-		this->obstacle.setPosition(0.f, static_cast<float>(rand() % static_cast<int>(this->window->getSize().y) - (this->obstacle.getSize().y)));
+		//std::cout << "gain coin method" << std::endl;
+		bool deleted = false;
 
-		this->obstacle.setOutlineColor(Color::Red);
-		this->obstacle.setSize(Vector2f(35.f, 35.f));
-		this->obstacle.setFillColor(Color::White);
+		for (int i = 0; i < coins.size() && deleted == false; i++)
+		{	
+			if (this->coins[i].getGlobalBounds().contains(this->gracz->get_position()))
+			{
+				this->pts += 10;
+				std::cout << "Points +10" << std::endl;
+				this->coins.erase(this->coins.begin() + i);
+				deleted = true;
+			}
+			
+		}
+	}
+	
 
-		
+
+
+
+
+
+	//Coins+obstacles functions
+
+	void set_objects()
+	{
+		option = rand() % 2;
+		this->set_coins();
+		this->set_obstacles();
 	}
 
-	void creating_obstacles()
+	void creating_objects()
 	{
 		if (time >= spawn_time)
 		{
-			this->set_obstacle();
+			this->set_objects();
 			time = Time::Zero;
 			this->obstacles.push_back(this->obstacle);
+			this->coins.push_back(this->coin);
+			num_of_objects++;
 		}
 	}
 
+	//Coins functions
+
+	void set_coins()
+	{
+		switch (option)
+		{
+		case 0:
+			this->coin.setPosition(800.f+space, static_cast<float>(rand() % 146 + 155));
+			break;
+		case 1:
+			this->coin.setPosition(800.f+space, static_cast<float>(rand() % 126 + 295));
+			break;
+		default:
+			break;
+		}
+
+
+		this->coin.setRadius(10.f);
+		this->coin.setFillColor(Color::Yellow);
+		this->coin.setOutlineColor(Color::White);
+		this->coin.setOutlineThickness(5.f);
+	}
+
+	void move_coins()
+	{
+		for (int i = 0; i < coins.size(); i++)
+		{
+			this->coins[i].setPosition(Vector2f(this->coins[i].getPosition().x - 2.f, this->coins[i].getPosition().y));
+			if (this->coins[i].getPosition().x <= 0.f)
+			{
+				this->coins.erase(this->coins.begin() + i);
+			}
+		}
+	}
+
+	void render_coins()
+	{
+		for (auto& coins_objects : this->coins)
+		{
+			this->window->draw(coins_objects);
+		}
+	}
+
+	//Obstacles functions
+
+	void set_obstacles()
+	{
+
+		switch (option)
+		{
+		case 0:
+			this->obstacle.setPosition(800.f, static_cast<float>(rand() % 141 + 160));
+			break;
+		case 1: 
+			this->obstacle.setPosition(800.f, static_cast<float>(rand() % 96 + 245));
+			break; 
+		default: 
+			break;
+		}
+
+		this->obstacle.setSize(Vector2f(25.f, 25.f));
+		this->obstacle.setFillColor(Color::White);
+		this->obstacle.setOutlineColor(Color::Red);
+		this->obstacle.setOutlineThickness(10.f);
+		
+	}
+
+	void move_obstacles()
+	{
+		for (int i = 0; i < obstacles.size(); i++)
+		{
+			this->obstacles[i].setPosition(Vector2f(this->obstacles[i].getPosition().x - 2.f, this->obstacles[i].getPosition().y));
+
+			if (this->obstacles[i].getPosition().x <= 0.f)
+			{
+				this->obstacles.erase(this->obstacles.begin() + i);
+			}
+		}
+	}
 
 	void render_obstacles()
 	{
 		for (auto& obstacles_objects : this->obstacles)
 		{
-			
 			this->window->draw(obstacles_objects);
 		}
 	}
@@ -235,9 +350,9 @@ private:
 
 	
 	
-		//OKNO I METODY ZASOBÓW
+		//Window functions
 
-		//Zdarzenie: okno
+		//window closing event
 		void pollEvents()
 		{
 			while (this->window->pollEvent(this->event))
@@ -251,7 +366,7 @@ private:
 		}
 
 
-		//Wczytanie fontu
+		//font upload
 		void game_font()
 		{
 			if (this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf"))
@@ -265,7 +380,7 @@ private:
 		}
 
 
-		//Wczytanie grafiki i t³a
+		//background and road upload
 
 		void game_rd()
 		{
@@ -303,7 +418,7 @@ private:
 		
 
 	public:
-		//Konstruktor/Destruktor
+		//Constructor/Destructor
 		Game()
 		{
 			//Konstruktor tworzy okno przy utworzeniu obiektu
@@ -343,33 +458,34 @@ private:
 		}
 
 		//Nowe informacje + render w grze
-		void update()
-		{
-			//time += clock.restart();
+		 void update()
+		 {
+			 time += clock.restart();
 
-			this->pollEvents();
+			 this->pollEvents();
 
-			//Objects spawn
+			 //Objects spawn
 
-			if (this->exit == false)
-			{
-				this->creating_obstacles();
-				//this->coin_spawn();
-				this->gracz->player_on_road();
-				
-				
-			}
+			 if (this->exit == false)
+			 {
+				 this->creating_objects();
+				 this->gracz->player_on_road();
+				 this->move_obstacles();
+				 this->move_coins();
+				 this->gain_points();
 
-			//Returning the information if the game is still on
+			 }
 
-			if (!this->gracz->player_on_road())
-			{
-				this->exit = true;
-				std::cout << "GAME OVER!" << std::endl << "POINTS: " << this->points;
-			}
-		
+			 //Returning the information if the game is still on
 
-		}
+			 if (!this->gracz->player_on_road())
+			 {
+				 this->exit = true;
+				 std::cout << std::endl << "GAME OVER!" << std::endl << "POINTS: " << this->pts;
+			 }
+
+
+		 }
 		
 		void render()
 		{
@@ -382,6 +498,8 @@ private:
 			this->gracz->render(*this->window);
 
 			this->render_obstacles();
+
+			this->render_coins();
 
 			this->window->display();
 

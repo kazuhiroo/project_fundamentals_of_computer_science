@@ -17,7 +17,8 @@ int main()
         gra.update();
         
     }
-
+    std::cout<<std::endl<<"Press ENTER to exit.";
+    getchar();
 
     return 0;
 }
