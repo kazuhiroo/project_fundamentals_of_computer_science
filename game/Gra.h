@@ -18,6 +18,7 @@
 
 using namespace sf;
 
+
 class Menu
 {
 protected:
@@ -401,13 +402,14 @@ private:
 
 	Texture image1;
 	Sprite char_image;
-	RectangleShape box;
+	
 
-	//
+	//Vectors
 
 	Vector2f position;
 	Vector2f pivot;
-	Vector2f hitbox;
+	Vector2f endpoint;
+
 
 	float rotation = 0;
 
@@ -447,7 +449,6 @@ public:
 		this->pivot = Vector2f(char_image.getLocalBounds().width / 3.f, char_image.getLocalBounds().height / 2.f);
 		this->char_image.setOrigin(pivot);
 
-		this->hitbox = Vector2f(-char_image.getLocalBounds().width / 3.f, char_image.getLocalBounds().height / 2.f);
 	}
 
 	~Character()
@@ -489,26 +490,24 @@ public:
 		if (rotation >= -95 && rotation <= 95)
 		{
 			position.y += 2 * std::sin(rotation * 3.14159 / 180);
-			hitbox.y += 2 * std::sin(rotation * 3.14159 / 180);
 		}
 		else
 		{
 			position.x += -2.f + std::cos(rotation * 3.14159 / 180);
 			position.y += std::sin(rotation * 3.14159 / 180);
-			hitbox.y += 2 * std::sin(rotation * 3.14159 / 180);
-			hitbox.x += -2.f + std::cos(rotation * 3.14159 / 180);
 		}
 
 
 		this->char_image.setRotation(rotation);
 		this->char_image.setPosition(position);
+		
 
 	}
 
 
 	bool player_on_road()
 	{
-		if (hitbox.y > 240.5f || hitbox.y < -45.5f || position.x <= 0.f)
+		if (position.y > 450.5f|| position.y < 150.5f || position.x <= 0.f)
 		{
 			return false;
 		}
@@ -522,6 +521,14 @@ public:
 	{
 		return position;
 	}
+
+	FloatRect get_bounds()
+	{
+		return char_image.getGlobalBounds();
+	}
+
+
+
 
 	//Rendering the player
 
@@ -551,7 +558,7 @@ private:
 	Character* gracz;
 
 	//Coins
-
+	Text chance;
 	Text points;
 	Font font;
 
@@ -560,6 +567,7 @@ private:
 	std::vector<Sprite> coins;
 
 	unsigned int pts = 0;
+	unsigned int chances = 3;
 
 	float space = 150.f;
 
@@ -574,7 +582,7 @@ private:
 	int option;
 
 	Time time = Time::Zero;
-	Time spawn_time = seconds(1.3);
+	Time spawn_time = seconds(1);
 	Clock clock;
 
 	//Background
@@ -610,9 +618,10 @@ private:
 	{
 		for (int i = 0; i < coins.size(); i++)
 		{
-			if (this->coins[i].getGlobalBounds().contains(this->gracz->get_position()))
+			if (this->coins[i].getGlobalBounds().intersects(this->gracz->get_bounds()))
 			{
 				this->pts += 1;
+				this->chances = 3;
 				std::cout << "Points +1" << std::endl;
 				this->coins.erase(this->coins.begin() + i);
 			}
@@ -626,8 +635,9 @@ private:
 		{
 			if (this->obstacles[i].getGlobalBounds().contains(this->gracz->get_position()))
 			{
+				
 				this->exit = true;
-				std::cout << std::endl << "GAME OVER!" << std::endl << "POINTS: " << this->pts;
+				std::cout << std::endl << "GAME OVER!" << std::endl << "COLLISION!" <<	std::endl << "POINTS: " << this->pts;
 			}
 		}
 	}
@@ -682,6 +692,7 @@ private:
 			if (this->coins[i].getPosition().x <= 0.f)
 			{
 				this->coins.erase(this->coins.begin() + i);
+				this->chances -= 1;
 			}
 		}
 	}
@@ -766,10 +777,14 @@ private:
 
 	void show_points()
 	{
-		std::stringstream ss;
+		std::stringstream points_string, miss_points_string;
 
-		ss << "Points: " << this->pts;
-		this->points.setString(ss.str());
+		points_string << "Points: " << this->pts;
+		this->points.setString(points_string.str());
+
+		miss_points_string << "Chances: " << this->chances;
+		this->chance.setString(miss_points_string.str());
+
 	}
 
 	//textures upload
@@ -845,7 +860,10 @@ public:
 		//Set font
 
 		this->points.setFont(this->font);
-		this->points.setPosition(Vector2f(80.f, 50.f));
+		this->points.setPosition(Vector2f(80.f, 40.f));
+
+		this->chance.setFont(this->font);
+		this->chance.setPosition(Vector2f(80.f, 80.f));
 
 
 	}
@@ -893,10 +911,16 @@ public:
 
 		//Returning the information if the game is still on
 
+		if (this->chances <= 0)
+		{
+			this->exit = true;
+			std::cout << std::endl << "GAME OVER!" << std::endl << "YOU MISSED TOO MANY COINS!"  << std::endl << "POINTS: " << this->pts;
+		}
+
 		if (!this->gracz->player_on_road())
 		{
 			this->exit = true;
-			std::cout << std::endl << "GAME OVER!" << std::endl << "POINTS: " << this->pts;
+			std::cout << std::endl << "GAME OVER!" << std::endl <<"YOU WENT OFF THE ROAD!" << std::endl<< "POINTS: " << this->pts;
 		}
 
 
@@ -911,6 +935,8 @@ public:
 		this->window->draw(this->road_image);
 
 		this->window->draw(this->points);
+
+		this->window->draw(this->chance);
 
 		this->gracz->render(*this->window);
 
