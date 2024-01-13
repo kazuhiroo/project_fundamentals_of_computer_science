@@ -33,15 +33,22 @@ protected:
 	Vector2i mouse_position;
 
 	//Resources
+
 	Text title;
 
 	Texture pl; 
 	Texture exx; 
 	Texture st;
+
 	Sprite play_image; 
 	Sprite exit_image; 
 	Sprite stats_image;
+
 	Font font;
+
+
+	//Bools
+
 
 	
 
@@ -133,6 +140,7 @@ public:
 		
 	}
 	//
+
 
 	bool esc = false;
 	bool play = false;
@@ -454,15 +462,13 @@ public:
 	{
 
 		//ARROW KEYS MOVEMENT
-
-
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
-			position.x += 1.f;
+			position.x += 0.5f;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			position.x += -1.f;
+			position.x += -0.5f;
 		}
 
 
@@ -512,11 +518,6 @@ public:
 		}
 	}
 
-	Vector2f get_hitbox()
-	{
-		//return hitbox1;
-	}
-
 	Vector2f get_position()
 	{
 		return position;
@@ -554,38 +555,42 @@ private:
 	Text points;
 	Font font;
 
-	CircleShape coin;
-	std::vector<CircleShape> coins;
+	Texture cns;
+	Sprite coin;
+	std::vector<Sprite> coins;
 
-	float space = 100.f;
+	unsigned int pts = 0;
+
+	float space = 150.f;
 
 	//Obstacles
-	RectangleShape obstacle;
-	std::vector<RectangleShape> obstacles;
+
+	Texture obs;
+	Sprite obstacle;
+	std::vector<Sprite> obstacles;
 
 
 	int num_of_objects = 0;
 	int option;
 
 	Time time = Time::Zero;
-	Time spawn_time = seconds(1);
+	Time spawn_time = seconds(1.3);
 	Clock clock;
 
-	//Resources
+	//Background
 
-	//Font font;
 	Texture bg;
 	Texture rd;
 	Sprite background_image;
 
-	//Sprite road_image;
+	//Road
 
 	Sprite road_image;
 	Vector2f road_position;
 	RectangleShape road;
 
 
-	unsigned int pts = 0;
+	
 
 	//end game bool
 
@@ -607,8 +612,8 @@ private:
 		{
 			if (this->coins[i].getGlobalBounds().contains(this->gracz->get_position()))
 			{
-				this->pts += 10;
-				std::cout << "Points +10" << std::endl;
+				this->pts += 1;
+				std::cout << "Points +1" << std::endl;
 				this->coins.erase(this->coins.begin() + i);
 			}
 
@@ -666,10 +671,7 @@ private:
 		}
 
 
-		this->coin.setRadius(10.f);
-		this->coin.setFillColor(Color::Yellow);
-		this->coin.setOutlineColor(Color::White);
-		this->coin.setOutlineThickness(5.f);
+		this->coin.setTexture(this->cns);
 	}
 
 	void move_coins()
@@ -709,11 +711,7 @@ private:
 			break;
 		}
 
-		this->obstacle.setSize(Vector2f(25.f, 25.f));
-		this->obstacle.setFillColor(Color::White);
-		this->obstacle.setOutlineColor(Color::Red);
-		this->obstacle.setOutlineThickness(10.f);
-
+		this->obstacle.setTexture(this->obs);
 	}
 
 	void move_obstacles()
@@ -757,7 +755,7 @@ private:
 	}
 
 
-	//RESORUCES UPLOADING
+	//RESOURCES UPLOADING
 
 	//text
 
@@ -774,7 +772,7 @@ private:
 		this->points.setString(ss.str());
 	}
 
-	//background and road upload
+	//textures upload
 
 	void game_rd()
 	{
@@ -807,9 +805,16 @@ private:
 	void upload_background()
 	{
 		this->background_image.setTexture(this->bg);
+		this->background_image.setPosition(Vector2f(0.f, 0.f));
 	}
-
-
+	void upload_obstacles()
+	{
+		this->obs.loadFromFile("Bg/obstacle.png");
+	}
+	void upload_coins()
+	{
+		this->cns.loadFromFile("Bg/coin.png");
+	}
 
 public:
 	//Constructor/Destructor
@@ -828,11 +833,16 @@ public:
 		this->game_rd();
 		this->create_road();
 		this->game_font();
+		this->upload_obstacles();
+		this->upload_coins();
 
 		//Spawn player
 
 		this->gracz = new Character;
+
 		time += clock.restart();
+
+		//Set font
 
 		this->points.setFont(this->font);
 		this->points.setPosition(Vector2f(80.f, 50.f));
@@ -909,7 +919,6 @@ public:
 		this->render_coins();
 
 		this->window->display();
-
 	}
 
 };
