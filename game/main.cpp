@@ -6,6 +6,8 @@ int main()
 {
     srand(time(NULL));
 
+    int highscore;
+
     Menu menu;
     
     Game* gra;
@@ -25,7 +27,7 @@ int main()
             
             menu.play = false;
 
-            while(gra->get_working() && !gra->get_exit())
+            while(gra->get_working() && !gra->get_esc_g())
             {
                 gra->update();
 

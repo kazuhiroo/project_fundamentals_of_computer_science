@@ -7,7 +7,7 @@
 #include <sstream>
 #include <vector>
 #include <cmath>
-
+#include <fstream>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -288,6 +288,7 @@ private:
 	{
 		this->gob.loadFromFile("Bg/back.png");
 	}
+
 	void upload_images()
 	{
 		this->go_back_image.setTexture(this->gob);
@@ -295,8 +296,6 @@ private:
 		this->go_back_image.scale(0.2f, 0.2f);
 
 	}
-
-	
 
 	void pollEvents()
 	{
@@ -332,7 +331,6 @@ public:
 		delete this->window;
 	}
 
-
 	void go_back()
 	{
 		if (this->go_back_image.getGlobalBounds().contains(Vector2f(mouse_position)))
@@ -351,6 +349,12 @@ public:
 		return this->mouse_position;
 	}
 
+
+	void get_stats_from_file()
+	{
+		//fstream stats("stats.txt" ios::out);
+		
+	}
 
 
 
@@ -558,6 +562,8 @@ private:
 	Character* gracz;
 
 	//Coins
+	Text end_points;
+	Text game_over;
 	Text chance;
 	Text points;
 	Font font;
@@ -597,18 +603,12 @@ private:
 	Vector2f road_position;
 	RectangleShape road;
 
-
-	
-
 	//end game bool
 
-	bool exit = false;
+	bool esc_g = false;
 
 
 	//PRIVATE FUNCTIONS
-
-
-
 
 	//void score_to_file(){}
 
@@ -629,15 +629,19 @@ private:
 		}
 	}
 
-	void collision()
+	bool collision()
 	{
 		for (int i = 0; i < obstacles.size(); i++)
 		{
 			if (this->obstacles[i].getGlobalBounds().contains(this->gracz->get_position()))
 			{
 				
-				this->exit = true;
-				std::cout << std::endl << "GAME OVER!" << std::endl << "COLLISION!" <<	std::endl << "POINTS: " << this->pts;
+				return true;
+				
+			}
+			else
+			{
+				return false;
 			}
 		}
 	}
@@ -748,9 +752,6 @@ private:
 
 
 
-
-	//Window functions
-
 	//window closing event
 
 	void pollEvents()
@@ -787,6 +788,15 @@ private:
 
 	}
 
+	void show_game_over()
+	{
+		std::stringstream go, end_pts;
+		go << "GAME OVER";
+		end_pts << "YOUR SCORE: " << this->pts;
+		this->game_over.setString(go.str());
+		this->end_points.setString(end_pts.str());
+	}
+
 	//textures upload
 
 	void game_rd()
@@ -801,11 +811,13 @@ private:
 			std::cout << "GAME::RESOURCES::Road image uploaded succesfully \n";
 		}
 	}
+	
 	void create_road()
 	{
 		this->road_image.setTexture(this->rd);
 		this->road_image.setPosition(Vector2f(0.f, 150.f));
 	}
+	
 	void game_bg()
 	{
 		if (this->bg.loadFromFile("Bg/bg.png"))
@@ -817,22 +829,27 @@ private:
 			std::cout << "GAME::RESOURCES::Background uploading unsuccessful" << std::endl;
 		}
 	}
+	
 	void upload_background()
 	{
 		this->background_image.setTexture(this->bg);
 		this->background_image.setPosition(Vector2f(0.f, 0.f));
 	}
+	
 	void upload_obstacles()
 	{
 		this->obs.loadFromFile("Bg/obstacle.png");
 	}
+	
 	void upload_coins()
 	{
 		this->cns.loadFromFile("Bg/coin.png");
 	}
 
 public:
+
 	//Constructor/Destructor
+
 	Game(String w_name = "Game")
 	{
 		//Creating a new window object on window pointer
@@ -865,6 +882,13 @@ public:
 		this->chance.setFont(this->font);
 		this->chance.setPosition(Vector2f(80.f, 80.f));
 
+		this->game_over.setFont(this->font);
+		this->game_over.setPosition(Vector2f(230.f, 200.f));
+		this->game_over.setCharacterSize(50);
+
+		this->end_points.setFont(this->font);
+		this->end_points.setPosition(Vector2f(240.f, 270.f));
+		this->end_points.setCharacterSize(30);
 
 	}
 
@@ -877,9 +901,9 @@ public:
 
 	//Bool information for game loop
 
-	bool get_exit()
+	bool get_esc_g()
 	{
-		return this->exit;
+		return this->esc_g;
 	}
 
 	bool get_working()
@@ -898,7 +922,7 @@ public:
 
 		//Objects spawn
 
-		if (this->exit == false)
+		if (this->esc_g == false)
 		{
 			this->creating_objects();
 			this->gracz->player_on_road();
@@ -909,17 +933,44 @@ public:
 
 		}
 
-		//Returning the information if the game is still on
+		//Checking the information if the game is still on
+
+		if (this->collision())
+		{
+			this->show_game_over();
+			this->window->draw(this->game_over);
+			this->window->draw(this->end_points);
+			this->window->display();
+
+			sleep(seconds(3));
+
+			this->esc_g = true;
+			std::cout << std::endl << "GAME OVER!" << std::endl << "COLLISION!" << std::endl << "POINTS: " << this->pts;
+		}
 
 		if (this->chances <= 0)
 		{
-			this->exit = true;
+			
+			this->window->draw(this->game_over);
+			this->window->draw(this->end_points);
+			this->window->display();
+
+			sleep(seconds(3));
+
+			this->esc_g = true;
 			std::cout << std::endl << "GAME OVER!" << std::endl << "YOU MISSED TOO MANY COINS!"  << std::endl << "POINTS: " << this->pts;
 		}
 
 		if (!this->gracz->player_on_road())
 		{
-			this->exit = true;
+			this->window->draw(this->game_over);	
+			this->window->draw(this->end_points);
+			this->window->display();
+
+
+			sleep(seconds(3));
+
+			this->esc_g = true;
 			std::cout << std::endl << "GAME OVER!" << std::endl <<"YOU WENT OFF THE ROAD!" << std::endl<< "POINTS: " << this->pts;
 		}
 
