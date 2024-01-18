@@ -3,11 +3,12 @@
 
 #include "Gra.cpp"
 #include <iostream>
+#include <fstream>
 #include <ctime>
 #include <sstream>
 #include <vector>
 #include <cmath>
-#include <fstream>
+
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -47,12 +48,6 @@ protected:
 
 	Font font;
 
-
-	//Bools
-
-
-	
-
 	//Functions
 
 	void pollEvents()
@@ -68,19 +63,8 @@ protected:
 	}
 
 	
-	//font upload
+	//text voids
 
-	void game_font()
-	{
-		if (this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf"))
-		{
-			std::cout << "GAME::RESOURCES::Font uploaded successfully" << std::endl;
-		}
-		if (this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf") == false)
-		{
-			std::cout << "GAME::RESOURCES::Font uploading unsuccessful" << std::endl;
-		}
-	}
 	void upload_text()
 	{
 		this->title.setFont(this->font);
@@ -119,10 +103,13 @@ public:
 		this->window->setVerticalSyncEnabled(false);
 
 		//Upload resources
-
+		
+		//textures
 		this->load_textures();
 		this->upload_images();
-		this->game_font();
+
+		//text
+		this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf");
 		this->upload_text();
 
 
@@ -133,15 +120,14 @@ public:
 		this->exit_image.setPosition(Vector2f(title_position.x, title_position.y + 300.f));
 		this->stats_image.setPosition(Vector2f(title_position.x, title_position.y+200.f));
 
-		//std::cout << this->play_image.getPosition().x << " "<< this->play_image.getPosition().y;
 
 	}
 	~Menu()
 	{
 		
 	}
-	//
 
+	//menu bools
 
 	bool esc = false;
 	bool play = false;
@@ -150,6 +136,7 @@ public:
 
 	//Functions
 
+	//bool - buttons functions
 
 	bool get_working_m()
 	{
@@ -178,6 +165,7 @@ public:
 		return this->mouse_position;
 	}
 
+	//play-stats-exit
 
 	void choose_option()
 	{
@@ -205,8 +193,7 @@ public:
 		}
 	}
 
-
-
+	//Menu loop
 
 	void update_menu()
 	{
@@ -240,22 +227,30 @@ public:
 class Stats 
 {
 private:
-	
+	//Window
+
 	RenderWindow* window;
 	Event event;
 	
+	//Text and buttons
+
 	Text title_s;
 	Text stats_text;
 	Texture gob;
 	Sprite go_back_image;
 
+	Font font;
+	//Interaction with mouse
 
 	Vector2i mouse_position;
 
-	Font font;
+	//Bool exit
 
 	bool esc_s = false;
 
+	//FUNCTIONS
+	
+	//text
 
 	void game_font()
 	{
@@ -289,7 +284,7 @@ private:
 		this->gob.loadFromFile("Bg/back.png");
 	}
 
-	void upload_images()
+	void create_images()
 	{
 		this->go_back_image.setTexture(this->gob);
 		
@@ -320,7 +315,7 @@ public:
 		this->upload_text();
 
 		this->load_textures();
-		this->upload_images();
+		this->create_images();
 
 		this->go_back_image.setPosition(Vector2f(10.f, 20.f));
 
@@ -330,6 +325,8 @@ public:
 	{
 		delete this->window;
 	}
+
+	//go back button
 
 	void go_back()
 	{
@@ -342,6 +339,8 @@ public:
 		}
 	}
 
+	//Mouse position
+
 	Vector2i get_mouse_position()
 	{
 		this->mouse_position = Mouse::getPosition(*this->window);
@@ -349,14 +348,15 @@ public:
 		return this->mouse_position;
 	}
 
+	//getting stats
 
 	void get_stats_from_file()
 	{
-		//fstream stats("stats.txt" ios::out);
+		
 		
 	}
 
-
+	//Bool function
 
 	bool get_working_s()
 	{
@@ -368,7 +368,7 @@ public:
 		return esc_s;
 	}
 
-
+	//Window loop
 
 	void update_stats()
 	{
@@ -459,21 +459,20 @@ public:
 	{}
 
 
-
-	//KEYBOARD <- ->
-	// ^
-	// v
+	//			  ^
+	// KEYBOARD <   >
+	//			  v	
 	void movement()
 	{
 
 		//ARROW KEYS MOVEMENT
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
-			position.x += 0.5f;
+			position.x += 0.3f;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			position.x += -0.5f;
+			position.x += -0.3f;
 		}
 
 
@@ -508,6 +507,7 @@ public:
 
 	}
 
+	//
 
 	bool player_on_road()
 	{
@@ -559,20 +559,23 @@ private:
 	Event event;
 
 	//Player
+
 	Character* gracz;
 
 	//Coins
+
 	Text end_points;
 	Text game_over;
 	Text chance;
 	Text points;
+
 	Font font;
 
 	Texture cns;
 	Sprite coin;
 	std::vector<Sprite> coins;
 
-	unsigned int pts = 0;
+	
 	unsigned int chances = 3;
 
 	float space = 150.f;
@@ -610,8 +613,6 @@ private:
 
 	//PRIVATE FUNCTIONS
 
-	//void score_to_file(){}
-
 	//Actions
 
 	void gain_points()
@@ -621,7 +622,7 @@ private:
 			if (this->coins[i].getGlobalBounds().intersects(this->gracz->get_bounds()))
 			{
 				this->pts += 1;
-				this->chances = 3;
+				this->chances += 1;
 				std::cout << "Points +1" << std::endl;
 				this->coins.erase(this->coins.begin() + i);
 			}
@@ -645,7 +646,6 @@ private:
 			}
 		}
 	}
-
 
 	//Coins+obstacles functions
 
@@ -767,14 +767,9 @@ private:
 	}
 
 
-	//RESOURCES UPLOADING
+	//RESOURCES SETTING & UPLOADING
 
 	//text
-
-	void game_font()
-	{
-		this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf");
-	}
 
 	void show_points()
 	{
@@ -791,25 +786,28 @@ private:
 	void show_game_over()
 	{
 		std::stringstream go, end_pts;
+
 		go << "GAME OVER";
 		end_pts << "YOUR SCORE: " << this->pts;
+
 		this->game_over.setString(go.str());
 		this->end_points.setString(end_pts.str());
 	}
 
 	//textures upload
-
-	void game_rd()
+	
+	void load_textures()
 	{
 		this->rd.loadFromFile("Bg/road.png");
-		if (!this->rd.loadFromFile("Bg/road.png"))
-		{
-			std::cout << "GAME::RESOURCES::Road upload failed \n";
-		}
-		if (this->rd.loadFromFile("Bg/road.png"))
-		{
-			std::cout << "GAME::RESOURCES::Road image uploaded succesfully \n";
-		}
+		this->bg.loadFromFile("Bg/bg.png");
+		this->obs.loadFromFile("Bg/obstacle.png");
+		this->cns.loadFromFile("Bg/coin.png");
+	}
+	
+	void create_background()
+	{
+		this->background_image.setTexture(this->bg);
+		this->background_image.setPosition(Vector2f(0.f, 0.f));
 	}
 	
 	void create_road()
@@ -817,36 +815,13 @@ private:
 		this->road_image.setTexture(this->rd);
 		this->road_image.setPosition(Vector2f(0.f, 150.f));
 	}
-	
-	void game_bg()
-	{
-		if (this->bg.loadFromFile("Bg/bg.png"))
-		{
-			std::cout << "GAME::RESOURCES::Background uploaded successfully" << std::endl;
-		}
-		if (this->bg.loadFromFile("Bg/bg.png") == false)
-		{
-			std::cout << "GAME::RESOURCES::Background uploading unsuccessful" << std::endl;
-		}
-	}
-	
-	void upload_background()
-	{
-		this->background_image.setTexture(this->bg);
-		this->background_image.setPosition(Vector2f(0.f, 0.f));
-	}
-	
-	void upload_obstacles()
-	{
-		this->obs.loadFromFile("Bg/obstacle.png");
-	}
-	
-	void upload_coins()
-	{
-		this->cns.loadFromFile("Bg/coin.png");
-	}
 
 public:
+
+	//Points (sent to main)
+
+	int pts = 0;
+
 
 	//Constructor/Destructor
 
@@ -860,14 +835,10 @@ public:
 
 		//Upload textures
 
-		this->game_bg();
-		this->upload_background();
-		this->game_rd();
+		this->load_textures();
+		this->create_background();
 		this->create_road();
-		this->game_font();
-		this->upload_obstacles();
-		this->upload_coins();
-
+		
 		//Spawn player
 
 		this->gracz = new Character;
@@ -875,6 +846,7 @@ public:
 		time += clock.restart();
 
 		//Set font
+		this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf");
 
 		this->points.setFont(this->font);
 		this->points.setPosition(Vector2f(80.f, 40.f));
@@ -950,7 +922,7 @@ public:
 
 		if (this->chances <= 0)
 		{
-			
+			this->show_game_over();
 			this->window->draw(this->game_over);
 			this->window->draw(this->end_points);
 			this->window->display();
@@ -963,6 +935,7 @@ public:
 
 		if (!this->gracz->player_on_road())
 		{
+			this->show_game_over();
 			this->window->draw(this->game_over);	
 			this->window->draw(this->end_points);
 			this->window->display();
