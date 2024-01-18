@@ -7,7 +7,9 @@ int main()
 {
     srand(time(NULL));
 
-    int highscore;
+    std::fstream highscore_txt("stats.txt", std::ios::out | std::ios::in);
+
+    int highscore=0;
 
     Menu menu;
     
@@ -33,6 +35,15 @@ int main()
                 gra->update();
 
                 gra->render();
+            }
+            
+
+            highscore_txt >> highscore;
+
+            if (highscore < gra->pts)
+            {
+                highscore_txt<< gra->pts;
+                highscore_txt.close();
             }
 
             delete gra;

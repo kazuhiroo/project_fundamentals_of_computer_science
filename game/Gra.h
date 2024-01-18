@@ -232,6 +232,8 @@ private:
 	RenderWindow* window;
 	Event event;
 	
+	int score;
+
 	//Text and buttons
 
 	Text title_s;
@@ -250,32 +252,39 @@ private:
 
 	//FUNCTIONS
 	
-	//text
+	//TEXT
 
-	void game_font()
-	{
-		if (this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf"))
-		{
-			std::cout << "GAME::RESOURCES::Font uploaded successfully" << std::endl;
-		}
-		if (this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf") == false)
-		{
-			std::cout << "GAME::RESOURCES::Font uploading unsuccessful" << std::endl;
-		}
-	}
+	//title
 
-	void upload_text()
+	void show_title()
 	{
 		this->title_s.setFont(this->font);
 		this->title_s.setString("STATS");
-		this->title_s.setCharacterSize(80.f);
+		this->title_s.setCharacterSize(50.f);
 
+		this->title_s.setPosition(Vector2f(300.f, 50.f));
+	}
+
+
+	//getting stats
+
+	void get_stats_from_file()
+	{
+		std::fstream stats_txt("stats.txt", std::ios::in);
+		stats_txt >> this->score;
+	}
+
+	void show_stats()
+	{
+		std::stringstream sts;
+		sts << "HIGHSCORE: " << this->score;
 
 		this->stats_text.setFont(this->font);
-		this->stats_text.setString("STATS");
-		this->stats_text.setCharacterSize(50.f);
-
+		this->stats_text.setString(sts.str());
+		this->stats_text.setPosition(Vector2f(200.f, 150.f));
+		this->stats_text.setCharacterSize(30.f);
 	}
+
 
 	//textures n sprites
 
@@ -311,8 +320,13 @@ public:
 		this->window->setFramerateLimit(144);
 		this->window->setVerticalSyncEnabled(false);
 
-		this->game_font();
-		this->upload_text();
+		//font
+
+		this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf");
+		this->show_title();
+		this->show_stats();
+
+		//textures
 
 		this->load_textures();
 		this->create_images();
@@ -348,13 +362,7 @@ public:
 		return this->mouse_position;
 	}
 
-	//getting stats
-
-	void get_stats_from_file()
-	{
-		
-		
-	}
+	
 
 	//Bool function
 
@@ -372,19 +380,18 @@ public:
 
 	void update_stats()
 	{
-		if (!this->get_esc_s())
-		{
 			this->pollEvents();
 			this->get_working_s();
 			this->get_mouse_position();
 			this->go_back();
-		}
 	}
 
 	void render_stats()
 	{
 		this->window->clear();
 
+		this->window->draw(this->stats_text);
+		this->window->draw(this->title_s);
 		this->window->draw(this->go_back_image);
 
 		this->window->display();
@@ -399,7 +406,7 @@ public:
 
 
 
-class Character
+class Car
 {
 private:
 	//Resources
@@ -431,7 +438,7 @@ private:
 	}
 
 public:
-	Character()
+	Car()
 	{
 		//Uploading resources
 
@@ -455,13 +462,14 @@ public:
 
 	}
 
-	~Character()
+	~Car()
 	{}
 
 
 	//			  ^
-	// KEYBOARD <   >
-	//			  v	
+	// KEYBOARD < v >
+	//
+				  	
 	void movement()
 	{
 
@@ -507,7 +515,7 @@ public:
 
 	}
 
-	//
+	//players position
 
 	bool player_on_road()
 	{
@@ -530,8 +538,6 @@ public:
 	{
 		return char_image.getGlobalBounds();
 	}
-
-
 
 
 	//Rendering the player
@@ -560,7 +566,7 @@ private:
 
 	//Player
 
-	Character* gracz;
+	Car* gracz;
 
 	//Coins
 
@@ -610,7 +616,6 @@ private:
 
 	bool esc_g = false;
 
-
 	//PRIVATE FUNCTIONS
 
 	//Actions
@@ -622,7 +627,10 @@ private:
 			if (this->coins[i].getGlobalBounds().intersects(this->gracz->get_bounds()))
 			{
 				this->pts += 1;
-				this->chances += 1;
+				if (this->chances < 3)
+				{
+					this->chances += 1;
+				}
 				std::cout << "Points +1" << std::endl;
 				this->coins.erase(this->coins.begin() + i);
 			}
@@ -822,13 +830,12 @@ public:
 
 	int pts = 0;
 
-
 	//Constructor/Destructor
 
 	Game(String w_name = "Game")
 	{
 		//Creating a new window object on window pointer
-
+		std::cout << "GAME_INFO: GAME STARTED \n";
 		this->window = new RenderWindow(VideoMode(800, 600), w_name);
 		this->window->setFramerateLimit(144);
 		this->window->setVerticalSyncEnabled(false);
@@ -841,7 +848,7 @@ public:
 		
 		//Spawn player
 
-		this->gracz = new Character;
+		this->gracz = new Car;
 
 		time += clock.restart();
 
@@ -905,7 +912,7 @@ public:
 
 		}
 
-		//Checking the information if the game is still on
+		//possible endgame
 
 		if (this->collision())
 		{
