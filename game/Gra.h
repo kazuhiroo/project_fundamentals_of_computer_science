@@ -426,7 +426,9 @@ protected:
 	Vector2f pivot;
 	Vector2f endpoint;
 
-	float speed;
+	float speed = 0;
+
+	//float turn_speed;
 
 	float rotation = 0;
 
@@ -549,12 +551,13 @@ public:
 		obiekt.draw(this->char_image);
 	}
 
-	void load_texture()
+	virtual void load_texture() 
 	{
 		this->image1.loadFromFile("Bg/car.png");
-	}
+	};
+	
 
-	void upload_texture()
+	virtual void upload_texture()
 	{
 		this->char_image.setTexture(this->image1);
 		this->char_image.scale(0.2f, 0.2f);
@@ -569,30 +572,29 @@ class F1 :public Car
 {
 private:
 
-public:
+	float speed;
 
-};
-
-class Bugatti :public Car
-{
-private:
+	float turn_speed;
 
 public:
+	F1()
+	{
+		this->load_texture();
+		this->upload_texture();
+	};
+	~F1() {};
+	void load_texture()
+	{
+		this->image1.loadFromFile("Bg/bugatti.png");
+	}
 
+	void upload_texture()
+	{
+		this->char_image.setTexture(this->image1);
+		//this->char_image.scale(0.2f, 0.2f);
+	}
 };
 
-class Civic :public Car
-{
-
-};
-
-class Scooter :public Car
-{
-private:
-
-public:
-
-};
 
 
 
@@ -610,7 +612,7 @@ private:
 
 	Car* gracz;
 
-	//Points (sent to main)
+	//Points
 
 	int pts = 0;
 
@@ -690,9 +692,9 @@ private:
 		{
 			if (this->obstacles[i].getGlobalBounds().contains(this->gracz->get_position()))
 			{
-				
+
 				return true;
-				
+
 			}
 			else
 			{
@@ -892,7 +894,7 @@ public:
 		
 		//Spawn player
 
-		this->gracz = new Car;
+		this->gracz = new F1;
 
 		time += clock.restart();
 
