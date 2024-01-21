@@ -4,7 +4,6 @@
 #include "Gra.cpp"
 #include <iostream>
 #include <fstream>
-#include <ctime>
 #include <sstream>
 #include <vector>
 #include <cmath>
@@ -227,11 +226,16 @@ public:
 class Stats 
 {
 private:
+
 	//Window
 
 	RenderWindow* window;
 	Event event;
 	
+	//getting data from txt
+
+	std::ifstream s_txt;
+
 	int score;
 
 	//Text and buttons
@@ -270,8 +274,8 @@ private:
 
 	void get_stats_from_file()
 	{
-		std::fstream stats_txt("stats.txt", std::ios::in);
-		stats_txt >> this->score;
+		s_txt.open("stats.txt", std::ios::in);
+		s_txt >> this->score;
 	}
 
 	void show_stats()
@@ -281,7 +285,7 @@ private:
 
 		this->stats_text.setFont(this->font);
 		this->stats_text.setString(sts.str());
-		this->stats_text.setPosition(Vector2f(200.f, 150.f));
+		this->stats_text.setPosition(Vector2f(250.f, 150.f));
 		this->stats_text.setCharacterSize(30.f);
 	}
 
@@ -324,6 +328,7 @@ public:
 
 		this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf");
 		this->show_title();
+		this->get_stats_from_file();
 		this->show_stats();
 
 		//textures
@@ -408,7 +413,7 @@ public:
 
 class Car
 {
-private:
+protected:
 	//Resources
 
 	Texture image1;
@@ -421,21 +426,13 @@ private:
 	Vector2f pivot;
 	Vector2f endpoint;
 
+	float speed;
 
 	float rotation = 0;
 
 	//Functions
 
-	void load_texture()
-	{
-		this->image1.loadFromFile("Bg/car.png");
-	}
-
-	void upload_texture()
-	{
-		this->char_image.setTexture(this->image1);
-		this->char_image.scale(0.2f, 0.2f);
-	}
+	
 
 public:
 	Car()
@@ -504,7 +501,7 @@ public:
 		}
 		else
 		{
-			position.x += -2.f + std::cos(rotation * 3.14159 / 180);
+			position.x += -1.5f + std::cos(rotation * 3.14159 / 180);
 			position.y += std::sin(rotation * 3.14159 / 180);
 		}
 
@@ -539,6 +536,10 @@ public:
 		return char_image.getGlobalBounds();
 	}
 
+	float get_speed()
+	{
+		return this->speed;
+	}
 
 	//Rendering the player
 
@@ -547,10 +548,51 @@ public:
 		this->movement();
 		obiekt.draw(this->char_image);
 	}
+
+	void load_texture()
+	{
+		this->image1.loadFromFile("Bg/car.png");
+	}
+
+	void upload_texture()
+	{
+		this->char_image.setTexture(this->image1);
+		this->char_image.scale(0.2f, 0.2f);
+	}
 };
 
 
 
+
+
+class F1 :public Car
+{
+private:
+
+public:
+
+};
+
+class Bugatti :public Car
+{
+private:
+
+public:
+
+};
+
+class Civic :public Car
+{
+
+};
+
+class Scooter :public Car
+{
+private:
+
+public:
+
+};
 
 
 
@@ -567,6 +609,10 @@ private:
 	//Player
 
 	Car* gracz;
+
+	//Points (sent to main)
+
+	int pts = 0;
 
 	//Coins
 
@@ -826,15 +872,13 @@ private:
 
 public:
 
-	//Points (sent to main)
-
-	int pts = 0;
 
 	//Constructor/Destructor
 
 	Game(String w_name = "Game")
 	{
 		//Creating a new window object on window pointer
+
 		std::cout << "GAME_INFO: GAME STARTED \n";
 		this->window = new RenderWindow(VideoMode(800, 600), w_name);
 		this->window->setFramerateLimit(144);
@@ -877,6 +921,12 @@ public:
 		delete this->gracz;
 	}
 
+	//Return
+
+	int get_points()
+	{
+		return this->pts;
+	}
 
 	//Bool information for game loop
 
@@ -909,7 +959,6 @@ public:
 			this->move_coins();
 			this->gain_points();
 			this->collision();
-
 		}
 
 		//possible endgame

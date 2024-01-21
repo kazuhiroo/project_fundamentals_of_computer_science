@@ -7,7 +7,8 @@ int main()
 {
     srand(time(NULL));
 
-    std::fstream highscore_txt("stats.txt", std::ios::out | std::ios::in);
+    ifstream h_txt;
+    ofstream h1_txt;
 
     int highscore=0;
 
@@ -26,6 +27,10 @@ int main()
 
         if (menu.Play())
         {
+            //renderwindow
+            //return obiekt pojazd
+            //window close
+
             gra = new Game;
             
             menu.play = false;
@@ -36,14 +41,20 @@ int main()
 
                 gra->render();
             }
-            
+           
+           h_txt.open("stats.txt", ios::in);
 
-            highscore_txt >> highscore;
+           h_txt >> highscore;
 
-            if (highscore < gra->pts)
+           h_txt.close();
+
+            if (highscore < gra->get_points())
             {
-                highscore_txt<< gra->pts;
-                highscore_txt.close();
+                h1_txt.open("stats.txt", ios::in);
+
+                h1_txt << gra->get_points();
+
+                h1_txt.close();
             }
 
             delete gra;
@@ -51,6 +62,7 @@ int main()
 
         if (menu.Statistics())
         {
+
             statystyki = new Stats;
 
             menu.stats = false;
