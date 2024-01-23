@@ -419,22 +419,20 @@ protected:
 	Texture image1;
 	Sprite char_image;
 	
-
 	//Vectors
 
 	Vector2f position;
 	Vector2f pivot;
 	Vector2f endpoint;
 
-	float speed = 0;
+	float cns_speed = 0.f;
+	float speed = 0.f;
+	float obj_speed = 0.f;
+	float rotation_speed = 0.f;
+	float turn_speed = 0.f;
 
-	//float turn_speed;
 
 	float rotation = 0;
-
-	//Functions
-
-	
 
 public:
 	Car()
@@ -454,7 +452,7 @@ public:
 		this->rotation = 0.f;
 		this->char_image.setRotation(rotation);
 
-		//Setting pivot and hitbox
+		//Setting pivot for the sprite
 
 		this->pivot = Vector2f(char_image.getLocalBounds().width / 3.f, char_image.getLocalBounds().height / 2.f);
 		this->char_image.setOrigin(pivot);
@@ -488,18 +486,18 @@ public:
 		// TURNING
 		if (Keyboard::isKeyPressed(Keyboard::Down))
 		{
-			rotation += 0.75f;
+			rotation += this->rotation_speed;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Up))
 		{
-			rotation -= 0.75f;
+			rotation -= this->rotation_speed;
 		}
 
 
 
 		if (rotation >= -95 && rotation <= 95)
 		{
-			position.y += 2 * std::sin(rotation * 3.14159 / 180);
+			position.y += this->turn_speed * std::sin(rotation * 3.14159 / 180);
 		}
 		else
 		{
@@ -538,9 +536,19 @@ public:
 		return char_image.getGlobalBounds();
 	}
 
-	float get_speed()
+	virtual float get_speed()
 	{
 		return this->speed;
+	}
+
+	virtual float get_obj_speed()
+	{
+		return this->obj_speed;
+	}
+
+	virtual float get_cns_speed()
+	{
+		return this->cns_speed;
 	}
 
 	//Rendering the player
@@ -551,10 +559,12 @@ public:
 		obiekt.draw(this->char_image);
 	}
 
-	virtual void load_texture() 
+	
+	void load_texture() 
 	{
-		this->image1.loadFromFile("Bg/car.png");
+		this->image1.loadFromFile("Bg/motorcycle.png");
 	};
+	
 	
 
 	virtual void upload_texture()
@@ -565,38 +575,90 @@ public:
 };
 
 
+/*
+	Polymorph classes of the Car class 
+	- F1 - difficulty hard
+	- Bugatti - difficulty semi-hard
+	- Ferrari - difficulty medium 
+	- Motorcycle - dunno
+*/
 
-
-
+//FORMULA CLASS 
 class F1 :public Car
 {
-private:
-
-	float speed;
-
-	float turn_speed;
 
 public:
-	F1()
+	F1(float t_speed = 2.f, float r_speed = 0.75f, float sp = 1.f, float o_speed = 2.f, float c_speed = 2.5f)
 	{
+		cns_speed = c_speed;
+		speed = sp;
+		obj_speed = o_speed;
+		turn_speed = t_speed;
+		rotation_speed = r_speed;
+
 		this->load_texture();
 		this->upload_texture();
+
+		//Setting pivot and hitbox
+
+		this->pivot = Vector2f(char_image.getLocalBounds().width / 3.f, char_image.getLocalBounds().height / 2.f);
+		this->char_image.setOrigin(pivot);
 	};
 	~F1() {};
+
 	void load_texture()
 	{
-		this->image1.loadFromFile("Bg/bugatti.png");
+		this->image1.loadFromFile("Bg/F1.png");
 	}
 
 	void upload_texture()
 	{
 		this->char_image.setTexture(this->image1);
-		//this->char_image.scale(0.2f, 0.2f);
 	}
 };
 
 
+//FORMULA CLASS 
+class Ferrari :public Car
+{
 
+public:
+	Ferrari(float t_speed = 2.f, float r_speed = 0.5f, float sp = 2.f, float o_speed = 4.f, float c_speed = 4.5f)
+	{
+		cns_speed = c_speed;
+		speed = sp;
+		obj_speed = o_speed;
+		turn_speed = t_speed;
+		rotation_speed = r_speed;
+
+		this->load_texture();
+		this->upload_texture();
+
+		//Setting pivot and hitbox
+
+		this->pivot = Vector2f(char_image.getLocalBounds().width / 3.f, char_image.getLocalBounds().height / 2.f);
+		this->char_image.setOrigin(pivot);
+	};
+	~Ferrari() {};
+
+	void load_texture()
+	{
+		this->image1.loadFromFile("Bg/ferrari.png");
+	}
+
+	void upload_texture()
+	{
+		this->char_image.setTexture(this->image1);
+	}
+};
+
+
+/*
+	Game class
+	- rendering window and other objects
+	- sets the flow of the game 
+	- creating a new object opens a new game run
+*/
 
 
 class Game 
@@ -644,9 +706,13 @@ private:
 	int num_of_objects = 0;
 	int option;
 
+	
 	Time time = Time::Zero;
-	Time spawn_time = seconds(1);
+	Time spawn_time;
 	Clock clock;
+
+	//Clock game_clock;
+	//Time game_time = Time::Zero;
 
 	//Background
 
@@ -748,7 +814,7 @@ private:
 	{
 		for (int i = 0; i < coins.size(); i++)
 		{
-			this->coins[i].setPosition(Vector2f(this->coins[i].getPosition().x - 2.f, this->coins[i].getPosition().y));
+			this->coins[i].setPosition(Vector2f(this->coins[i].getPosition().x - this->gracz->get_cns_speed(), this->coins[i].getPosition().y));
 			if (this->coins[i].getPosition().x <= 0.f)
 			{
 				this->coins.erase(this->coins.begin() + i);
@@ -789,7 +855,7 @@ private:
 	{
 		for (int i = 0; i < obstacles.size(); i++)
 		{
-			this->obstacles[i].setPosition(Vector2f(this->obstacles[i].getPosition().x - 2.f, this->obstacles[i].getPosition().y));
+			this->obstacles[i].setPosition(Vector2f(this->obstacles[i].getPosition().x - this->gracz->get_obj_speed(), this->obstacles[i].getPosition().y));
 
 			if (this->obstacles[i].getPosition().x <= 0.f)
 			{
@@ -879,6 +945,17 @@ public:
 
 	Game(String w_name = "Game")
 	{
+
+		//Spawn player
+
+		this->gracz = new F1;
+
+		//Clock reset and its settings
+
+		time += clock.restart();
+
+		spawn_time = seconds(this->gracz->get_speed());
+
 		//Creating a new window object on window pointer
 
 		std::cout << "GAME_INFO: GAME STARTED \n";
@@ -892,11 +969,6 @@ public:
 		this->create_background();
 		this->create_road();
 		
-		//Spawn player
-
-		this->gracz = new F1;
-
-		time += clock.restart();
 
 		//Set font
 		this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf");
@@ -972,7 +1044,7 @@ public:
 			this->window->draw(this->end_points);
 			this->window->display();
 
-			sleep(seconds(3));
+			sleep(seconds(2.5));
 
 			this->esc_g = true;
 			std::cout << std::endl << "GAME OVER!" << std::endl << "COLLISION!" << std::endl << "POINTS: " << this->pts;
@@ -985,7 +1057,7 @@ public:
 			this->window->draw(this->end_points);
 			this->window->display();
 
-			sleep(seconds(3));
+			sleep(seconds(2.5));
 
 			this->esc_g = true;
 			std::cout << std::endl << "GAME OVER!" << std::endl << "YOU MISSED TOO MANY COINS!"  << std::endl << "POINTS: " << this->pts;
@@ -999,7 +1071,7 @@ public:
 			this->window->display();
 
 
-			sleep(seconds(3));
+			sleep(seconds(2.5));
 
 			this->esc_g = true;
 			std::cout << std::endl << "GAME OVER!" << std::endl <<"YOU WENT OFF THE ROAD!" << std::endl<< "POINTS: " << this->pts;
