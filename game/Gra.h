@@ -726,7 +726,7 @@ public:
 
 	virtual void load_texture() 
 	{
-		this->image1.loadFromFile("Bg/motorcycle.png");
+		this->image1.loadFromFile("Bg/F1.png");
 	};
 	
 	virtual void upload_texture()
@@ -820,8 +820,6 @@ public:
 		turn_speed = t_speed;
 		rotation_speed = r_speed;
 		space = spc;
-
-
 
 		this->load_texture();
 		this->upload_texture();
