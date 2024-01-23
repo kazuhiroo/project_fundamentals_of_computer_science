@@ -28,7 +28,7 @@ using namespace sf;
 
 class Menu
 {
-protected:
+private:
 
 	//Window Pointer
 
@@ -37,22 +37,41 @@ protected:
 	Event event;
 
 
-	Vector2f title_position;
+	Vector2f r_position;
 	Vector2i mouse_position;
 
 	//Resources
 
 	Text title;
+	Text text_car;
+	//buttons textures & sprites
+	Texture bg;
+	Sprite background_image;
 
-	Texture pl; 
-	Texture exx; 
-	Texture st;
+	Texture pl; //play
+	Texture exx; //exit
+	Texture st; //stats
 
 	Sprite play_image; 
 	Sprite exit_image; 
 	Sprite stats_image;
 
+	//cars textures & sprites
+
+	Texture f1;
+	Texture f12;
+	Texture mi;
+	Texture mi2;
+	Texture fer;
+	Texture fer2;
+	
+	Sprite f1_image;
+	Sprite miami_image;
+	Sprite ferrari_image;
+	
 	Font font;
+
+	int car_type;
 
 	//Functions
 
@@ -69,33 +88,98 @@ protected:
 	}
 
 	
-	//text voids
+	//text function
 
 	void upload_text()
 	{
+		this->text_car.setFont(this->font);
+		this->text_car.setString("CHOOSE YOUR CAR:");
+		this->text_car.setCharacterSize(25.f);
+
 		this->title.setFont(this->font);
 		this->title.setString("PIXEL RACE");
 		this->title.setCharacterSize(80.f);
 	}
 
-	//textures n sprites
+	//TEXTURES AND SPRITES
 
-	void load_textures()
+	//load functions
+	void load_buttons_textures()
 	{
 		this->pl.loadFromFile("Bg/play.png");
 		this->exx.loadFromFile("Bg/exit.png");
 		this->st.loadFromFile("Bg/stats.png");
+		this->bg.loadFromFile("Bg/bg.png");
 	}
-	void upload_images()
+
+	void upload_buttons_images()
 	{
 		this->play_image.setTexture(this->pl);
 		this->exit_image.setTexture(this->exx);
 		this->stats_image.setTexture(this->st);
+		this->background_image.setTexture(this->bg);
 
-		this->play_image.scale(0.2f, 0.2f);
-		this->exit_image.scale(0.2f, 0.2f);
-		this->stats_image.scale(0.2f, 0.2f);
 
+	}
+
+	void load_cars_textures()
+	{
+		this->fer.loadFromFile("Bg/ch_ferrari.png");
+		this->fer2.loadFromFile("Bg/chsn_ferrari.png");
+		this->f1.loadFromFile("Bg/ch_f1.png");
+		this->f12.loadFromFile("Bg/chsn_f1.png");
+		this->mi.loadFromFile("Bg/ch_miami.png");
+		this->mi2.loadFromFile("Bg/chsn_miami.png");
+	}
+
+	void upload_cars_images()
+	{ 
+		switch (this->car_type)
+		{
+			case 1:
+			{
+				this->ferrari_image.setTexture(this->fer2);
+				this->f1_image.setTexture(this->f1);
+				this->miami_image.setTexture(this->mi);
+				
+				break;
+			}
+			case 2:
+			{
+				this->ferrari_image.setTexture(this->fer);
+				this->f1_image.setTexture(this->f12);
+				this->miami_image.setTexture(this->mi);
+				
+				break;
+			}
+			case 3:
+			{
+				this->ferrari_image.setTexture(this->fer);
+				this->f1_image.setTexture(this->f1);
+				this->miami_image.setTexture(this->mi2);
+			
+				break;
+			}
+		}
+	}
+
+	//Render parts
+
+	void render_static()
+	{
+		this->window->draw(this->background_image);
+		this->window->draw(this->title);
+		this->window->draw(this->text_car);
+		this->window->draw(this->play_image);
+		this->window->draw(this->stats_image);
+		this->window->draw(this->exit_image);
+	}
+
+	void render_dynamic()
+	{
+		this->window->draw(this->ferrari_image);
+		this->window->draw(this->f1_image);
+		this->window->draw(this->miami_image);
 	}
 
 public:
@@ -107,38 +191,65 @@ public:
 		this->window = new RenderWindow(VideoMode(800, 600), window_name);
 		this->window->setFramerateLimit(144);
 		this->window->setVerticalSyncEnabled(false);
-
+		
 		//Upload resources
 		
 		//textures
-		this->load_textures();
-		this->upload_images();
-
+		this->load_buttons_textures();
+		this->load_cars_textures();
+		this->upload_buttons_images();
+		this->upload_cars_images();
+		
 		//text
 		this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf");
 		this->upload_text();
 
+		//menu's objects position
+		this->r_position = Vector2f(100.f, 150.f);
+		
+		this->title.setPosition(r_position.x, r_position.y-50.f);
 
-		this->title_position = Vector2f(320.f, 150.f);
+		this->text_car.setPosition(r_position.x + 300.f, r_position.y + 50.f);
 
-		this->title.setPosition(title_position.x-220.f, title_position.y-50.f);
-		this->play_image.setPosition(title_position.x, title_position.y+100.f);
-		this->exit_image.setPosition(Vector2f(title_position.x, title_position.y + 300.f));
-		this->stats_image.setPosition(Vector2f(title_position.x, title_position.y+200.f));
+		this->play_image.setPosition(r_position.x, r_position.y + 100.f);
+		this->exit_image.setPosition(r_position.x, r_position.y + 300.f);
+		this->stats_image.setPosition(r_position.x, r_position.y + 200.f);
+
+		this->play_image.scale(0.2f, 0.2f);
+		this->exit_image.scale(0.2f, 0.2f);
+		this->stats_image.scale(0.2f, 0.2f);
+
+		//cars images
+		this->ferrari_image.setPosition(r_position.x + 360.f, r_position.y + 100.f);
+		this->f1_image.setPosition(r_position.x + 360.f, r_position.y + 200.f);
+		this->miami_image.setPosition(r_position.x + 360.f, r_position.y + 300.f);
 
 
+		this->ferrari_image.scale(0.25f, 0.25f);
+		this->f1_image.scale(0.25f, 0.25f);
+		this->miami_image.scale(0.25f, 0.25f);
+
+		//Default car choose
+
+		car_type = 1;
 	}
 	~Menu()
 	{
 		
 	}
 
+
+	int get_car_type()
+	{
+		return this->car_type;
+	}
+
+
 	//menu bools
 
 	bool esc = false;
 	bool play = false;
 	bool stats = false;
-
 
 	//Functions
 
@@ -171,9 +282,9 @@ public:
 		return this->mouse_position;
 	}
 
-	//play-stats-exit
+	//play-stats-exit interaction
 
-	void choose_option()
+	void choose_menu_option()
 	{
 		
 		if (this->play_image.getGlobalBounds().contains(Vector2f(mouse_position)))
@@ -199,30 +310,57 @@ public:
 		}
 	}
 
+	//choosing a car
+
+	void choose_car_option()
+	{
+		if (this->ferrari_image.getGlobalBounds().contains(Vector2f(mouse_position)))
+		{
+			if (Mouse::isButtonPressed(Mouse::Left))
+			{
+				car_type = 1;
+				
+			}
+		}
+		if (this->f1_image.getGlobalBounds().contains(Vector2f(mouse_position)))
+		{
+			if (Mouse::isButtonPressed(Mouse::Left))
+			{
+				car_type = 2;
+				
+			}
+		}
+		if (this->miami_image.getGlobalBounds().contains(Vector2f(mouse_position)))
+		{
+			if (Mouse::isButtonPressed(Mouse::Left))
+			{
+				car_type = 3;
+				
+			}
+		}
+	}
+
 	//Menu loop
 
 	void update_menu()
 	{
-		if (!this->get_esc())
-		{
-			this->pollEvents();
-			this->get_working_m();
-			this->get_mouse_position();
-			this->choose_option();
-			this->Play();
-			this->Statistics();
-		}
+		this->pollEvents();
+		this->upload_cars_images();
+		this->get_working_m();
+		this->get_mouse_position();
+		this->choose_car_option();
+		this->choose_menu_option();
+		this->Play();
+		this->Statistics();
 	}
 
 	void render_menu()
 	{
 		this->window->clear();
 
-		this->window->draw(this->title);
-
-		this->window->draw(this->play_image);
-		this->window->draw(this->stats_image);
-		this->window->draw(this->exit_image);
+		this->render_static();
+		this->render_dynamic();
+	
 
 		this->window->display();
 	}
@@ -244,15 +382,15 @@ private:
 
 	std::ifstream s_txt;
 
-	int score;
+	int score1, score2, score3;
 
-	//Text and buttons
-
+	//Text, background and buttons
+	Texture bg;
 	Text title_s;
 	Text stats_text;
 	Texture gob;
 	Sprite go_back_image;
-
+	Sprite background_image;
 	Font font;
 	//Interaction with mouse
 
@@ -283,13 +421,13 @@ private:
 	void get_stats_from_file()
 	{
 		s_txt.open("stats.txt", std::ios::in);
-		s_txt >> this->score;
+		s_txt >> this->score1;
 	}
 
 	void show_stats()
 	{
 		std::stringstream sts;
-		sts << "HIGHSCORE: " << this->score;
+		sts << "HIGHSCORE: " << this->score1;
 
 		this->stats_text.setFont(this->font);
 		this->stats_text.setString(sts.str());
@@ -303,12 +441,14 @@ private:
 	void load_textures()
 	{
 		this->gob.loadFromFile("Bg/back.png");
+		this->bg.loadFromFile("Bg/bg.png");
+		
 	}
 
 	void create_images()
 	{
 		this->go_back_image.setTexture(this->gob);
-		
+		this->background_image.setTexture(this->bg);
 		this->go_back_image.scale(0.2f, 0.2f);
 
 	}
@@ -371,7 +511,6 @@ public:
 	Vector2i get_mouse_position()
 	{
 		this->mouse_position = Mouse::getPosition(*this->window);
-		//std::cout << mouse_position.x << " "<< mouse_position.y << std::endl;
 		return this->mouse_position;
 	}
 
@@ -403,6 +542,7 @@ public:
 	{
 		this->window->clear();
 
+		this->window->draw(this->background_image);
 		this->window->draw(this->stats_text);
 		this->window->draw(this->title_s);
 		this->window->draw(this->go_back_image);
@@ -419,14 +559,13 @@ public:
 /*
 	Main Car class with a
 	Polymorphy classes of the Car class
-	- F1 - difficulty ?
-	- Bugatti - difficulty ?
-	- Hotline Miami - difficulty ?
-	- Motorcycle - dunno
+	- Ferrari - easy
+	- Ferrari - medium
+	- Hotline Miami - easter egg - elite
 */
 
 
-//MAIN CLASS
+//MAIN CAR CLASS
 
 class Car
 {
@@ -531,7 +670,7 @@ public:
 
 	}
 
-	//player's position
+	//player's data
 
 	bool player_on_road()
 	{
@@ -574,6 +713,7 @@ public:
 	{
 		return this->space;
 	}
+
 	//Rendering the player
 
 	void render(RenderTarget& obiekt)
@@ -582,18 +722,16 @@ public:
 		obiekt.draw(this->char_image);
 	}
 
-	
+	//Loading resources
+
 	virtual void load_texture() 
 	{
 		this->image1.loadFromFile("Bg/motorcycle.png");
 	};
 	
-	
-
 	virtual void upload_texture()
 	{
 		this->char_image.setTexture(this->image1);
-		
 	}
 };
 
@@ -707,42 +845,6 @@ public:
 	}
 };
 
-//MOTORCYCLE CLASS
-class Motorcycle :public Car
-{
-public:
-	Motorcycle(float t_speed = 3.f, float r_speed = 1.5f, float sp = 1.f, float o_speed = 3.f, float c_speed = 2.f, float spc = 150.f)
-	{
-		cns_speed = c_speed;
-		speed = sp;
-		obj_speed = o_speed;
-		turn_speed = t_speed;
-		rotation_speed = r_speed;
-		space = spc;
-
-
-
-		this->load_texture();
-		this->upload_texture();
-
-		//Setting pivot and hitbox
-
-		this->pivot = Vector2f(char_image.getLocalBounds().width / 3.f, char_image.getLocalBounds().height / 2.f);
-		this->char_image.setOrigin(pivot);
-	};
-	~Motorcycle () {};
-
-	void load_texture()
-	{
-		this->image1.loadFromFile("Bg/motorcycle.png");
-	}
-
-	void upload_texture()
-	{
-		this->char_image.setTexture(this->image1);
-		this->char_image.scale(0.25f, 0.25f);
-	}
-};
 
 
 /*
@@ -753,12 +855,12 @@ public:
 */
 
 
-class Game 
+class Game
 {
 private:
 
 	//Window Pointer
-
+	
 	RenderWindow* window;
 	Event event;
 
@@ -797,7 +899,7 @@ private:
 
 	int num_of_objects = 0;
 	int option;
-
+	int c_chosen = 1;
 	
 	Time time = Time::Zero;
 	Time spawn_time;
@@ -1030,17 +1132,30 @@ private:
 		this->road_image.setPosition(Vector2f(0.f, 150.f));
 	}
 
+	
+	
 public:
-
 
 	//Constructor/Destructor
 
-	Game(String w_name = "Game")
+	Game(int c_chosen)
 	{
+		//Spawn chosen player
 
-		//Spawn player
-
-		this->gracz = new Motorcycle;
+		switch (c_chosen)
+		{
+		case 1:
+			this->gracz = new Ferrari;
+			break;
+		case 2:
+			this->gracz = new F1;
+			break;
+		case 3:
+			this->gracz = new Miami;
+			break;
+		}
+		
+		
 
 		//Clock reset and its settings
 
@@ -1050,8 +1165,8 @@ public:
 
 		//Creating a new window object on window pointer
 
-		std::cout << "GAME_INFO: GAME STARTED \n";
-		this->window = new RenderWindow(VideoMode(800, 600), w_name);
+		std::cout << std::endl << "GAME_INFO: GAME STARTED"<< std::endl ;
+		this->window = new RenderWindow(VideoMode(800, 600), "Game");
 		this->window->setFramerateLimit(144);
 		this->window->setVerticalSyncEnabled(false);
 
