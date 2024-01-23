@@ -19,6 +19,13 @@
 using namespace sf;
 
 
+/*
+	User Interface windows classes sucha as main menu 
+	and stats window with the saved highscore (futurably)
+*/
+
+//MENU CLASS
+
 class Menu
 {
 protected:
@@ -222,6 +229,7 @@ public:
 };
 
 
+//STATS CLASS
 
 class Stats 
 {
@@ -408,12 +416,22 @@ public:
 
 
 
+/*
+	Main Car class with a
+	Polymorphy classes of the Car class
+	- F1 - difficulty ?
+	- Bugatti - difficulty ?
+	- Hotline Miami - difficulty ?
+	- Motorcycle - dunno
+*/
 
 
+//MAIN CLASS
 
 class Car
 {
 protected:
+
 	//Resources
 
 	Texture image1;
@@ -430,7 +448,7 @@ protected:
 	float obj_speed = 0.f;
 	float rotation_speed = 0.f;
 	float turn_speed = 0.f;
-
+	float space = 0.f;
 
 	float rotation = 0;
 
@@ -454,7 +472,7 @@ public:
 
 		//Setting pivot for the sprite
 
-		this->pivot = Vector2f(char_image.getLocalBounds().width / 3.f, char_image.getLocalBounds().height / 2.f);
+		this->pivot = Vector2f(char_image.getLocalBounds().width / 2.5f, char_image.getLocalBounds().height / 2.f);
 		this->char_image.setOrigin(pivot);
 
 	}
@@ -463,14 +481,15 @@ public:
 	{}
 
 
-	//			  ^
-	// KEYBOARD < v >
-	//
+	/*			   ^
+		KEYBOARD <   >
+				   v
+	*/
 				  	
 	void movement()
 	{
 
-		//ARROW KEYS MOVEMENT
+		//ARROW KEYS MOVEMENT (optional)
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
 			position.x += 0.3f;
@@ -494,7 +513,7 @@ public:
 		}
 
 
-
+		//UP AND DOWN MOVEMENT
 		if (rotation >= -95 && rotation <= 95)
 		{
 			position.y += this->turn_speed * std::sin(rotation * 3.14159 / 180);
@@ -512,7 +531,7 @@ public:
 
 	}
 
-	//players position
+	//player's position
 
 	bool player_on_road()
 	{
@@ -536,21 +555,25 @@ public:
 		return char_image.getGlobalBounds();
 	}
 
-	virtual float get_speed()
+	float get_speed()
 	{
 		return this->speed;
 	}
 
-	virtual float get_obj_speed()
+	float get_obj_speed()
 	{
 		return this->obj_speed;
 	}
 
-	virtual float get_cns_speed()
+	float get_cns_speed()
 	{
 		return this->cns_speed;
 	}
 
+	float get_space()
+	{
+		return this->space;
+	}
 	//Rendering the player
 
 	void render(RenderTarget& obiekt)
@@ -560,7 +583,7 @@ public:
 	}
 
 	
-	void load_texture() 
+	virtual void load_texture() 
 	{
 		this->image1.loadFromFile("Bg/motorcycle.png");
 	};
@@ -570,20 +593,12 @@ public:
 	virtual void upload_texture()
 	{
 		this->char_image.setTexture(this->image1);
-		this->char_image.scale(0.2f, 0.2f);
+		
 	}
 };
 
 
-/*
-	Polymorph classes of the Car class 
-	- F1 - difficulty hard
-	- Bugatti - difficulty semi-hard
-	- Ferrari - difficulty medium 
-	- Motorcycle - dunno
-*/
-
-//FORMULA CLASS 
+//FORMULA ONE CLASS 
 class F1 :public Car
 {
 
@@ -614,22 +629,24 @@ public:
 	void upload_texture()
 	{
 		this->char_image.setTexture(this->image1);
+		this->char_image.scale(0.2f, 0.2f);
 	}
 };
 
-
-//FORMULA CLASS 
+//FERRARI CLASS 
 class Ferrari :public Car
 {
 
 public:
-	Ferrari(float t_speed = 2.f, float r_speed = 0.5f, float sp = 2.f, float o_speed = 4.f, float c_speed = 4.5f)
+	Ferrari(float t_speed = 2.2f, float r_speed = 0.6f, float sp = 1.f, float o_speed = 3.5f, float c_speed = 3.5f, float spc = 200.f)
 	{
 		cns_speed = c_speed;
 		speed = sp;
 		obj_speed = o_speed;
 		turn_speed = t_speed;
 		rotation_speed = r_speed;
+		space = spc;
+
 
 		this->load_texture();
 		this->upload_texture();
@@ -649,13 +666,88 @@ public:
 	void upload_texture()
 	{
 		this->char_image.setTexture(this->image1);
+		this->char_image.scale(0.2f, 0.2f);
+	}
+};
+
+//HOTLINE MIAMI CLASS
+class Miami :public Car
+{
+public:
+	Miami(float t_speed = 2.2f, float r_speed = 0.55f, float sp = 1.f, float o_speed = 3.5f, float c_speed = 3.5f, float spc = 200.f)
+	{
+		cns_speed = c_speed;
+		speed = sp;
+		obj_speed = o_speed;
+		turn_speed = t_speed;
+		rotation_speed = r_speed;
+		space = spc;
+
+
+
+		this->load_texture();
+		this->upload_texture();
+
+		//Setting pivot and hitbox
+
+		this->pivot = Vector2f(char_image.getLocalBounds().width / 3.f, char_image.getLocalBounds().height / 2.f);
+		this->char_image.setOrigin(pivot);
+	};
+	~Miami() {};
+
+	void load_texture()
+	{
+		this->image1.loadFromFile("Bg/miami.png");
+	}
+
+	void upload_texture()
+	{
+		this->char_image.setTexture(this->image1);
+		this->char_image.scale(0.25f, 0.25f);
+	}
+};
+
+//MOTORCYCLE CLASS
+class Motorcycle :public Car
+{
+public:
+	Motorcycle(float t_speed = 3.f, float r_speed = 1.5f, float sp = 1.f, float o_speed = 3.f, float c_speed = 2.f, float spc = 150.f)
+	{
+		cns_speed = c_speed;
+		speed = sp;
+		obj_speed = o_speed;
+		turn_speed = t_speed;
+		rotation_speed = r_speed;
+		space = spc;
+
+
+
+		this->load_texture();
+		this->upload_texture();
+
+		//Setting pivot and hitbox
+
+		this->pivot = Vector2f(char_image.getLocalBounds().width / 3.f, char_image.getLocalBounds().height / 2.f);
+		this->char_image.setOrigin(pivot);
+	};
+	~Motorcycle () {};
+
+	void load_texture()
+	{
+		this->image1.loadFromFile("Bg/motorcycle.png");
+	}
+
+	void upload_texture()
+	{
+		this->char_image.setTexture(this->image1);
+		this->char_image.scale(0.25f, 0.25f);
 	}
 };
 
 
 /*
 	Game class
-	- rendering window and other objects
+	- rendering game window and other objects
 	- sets the flow of the game 
 	- creating a new object opens a new game run
 */
@@ -694,7 +786,7 @@ private:
 	
 	unsigned int chances = 3;
 
-	float space = 150.f;
+	
 
 	//Obstacles
 
@@ -797,10 +889,10 @@ private:
 		switch (option)
 		{
 		case 0:
-			this->coin.setPosition(800.f + space, static_cast<float>(rand() % 146 + 155));
+			this->coin.setPosition(800.f + this->gracz->get_space(), static_cast<float>(rand() % 146 + 155));
 			break;
 		case 1:
-			this->coin.setPosition(800.f + space, static_cast<float>(rand() % 126 + 295));
+			this->coin.setPosition(800.f + this->gracz->get_space(), static_cast<float>(rand() % 126 + 295));
 			break;
 		default:
 			break;
@@ -948,7 +1040,7 @@ public:
 
 		//Spawn player
 
-		this->gracz = new F1;
+		this->gracz = new Motorcycle;
 
 		//Clock reset and its settings
 
@@ -1084,6 +1176,8 @@ public:
 	{
 		this->window->clear();
 
+	
+
 		this->window->draw(this->background_image);
 
 		this->window->draw(this->road_image);
@@ -1092,11 +1186,14 @@ public:
 
 		this->window->draw(this->chance);
 
+
 		this->gracz->render(*this->window);
 
 		this->render_obstacles();
 
 		this->render_coins();
+
+
 
 		this->window->display();
 	}

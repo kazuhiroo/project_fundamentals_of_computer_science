@@ -41,7 +41,9 @@ int main()
 
                 gra->render();
             }
-           
+           //getting data from txt file and checking the highscore
+           //after the game
+
            h_txt.open("stats.txt", ios::in);
 
            h_txt >> highscore;
