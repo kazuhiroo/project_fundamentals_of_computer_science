@@ -484,8 +484,30 @@ private:
 	{
 		this->go_back_image.setTexture(this->gob);
 		this->background_image.setTexture(this->bg);
+		this->ferrari_image.setTexture(this->fr);
+		this->f1_image.setTexture(this->f1);
+		this->miami_image.setTexture(this->mi);
+		
+		this->ferrari_image.setRotation(-90.f);
+		this->f1_image.setRotation(-90.f);
+		this->miami_image.setRotation(-90.f);
+
 		this->go_back_image.scale(0.2f, 0.2f);
+		this->ferrari_image.scale(0.5f, 0.5f);
+		this->f1_image.scale(0.5f, 0.5f);
+		this->miami_image.scale(0.5f, 0.5f);
 	}
+
+	void render_images()
+	{
+		this->window->draw(this->title_s);
+		this->window->draw(this->go_back_image);
+		this->window->draw(this->ferrari_image);
+		this->window->draw(this->f1_image);
+		this->window->draw(this->miami_image);
+	}
+
+
 
 	void pollEvents()
 	{
@@ -519,7 +541,9 @@ public:
 		this->create_images();
 
 		this->go_back_image.setPosition(Vector2f(10.f, 20.f));
-
+		this->ferrari_image.setPosition(Vector2f(90.f, 350.f));
+		this->f1_image.setPosition(Vector2f(340.f, 350.f));
+		this->miami_image.setPosition(Vector2f(560.f, 350.f));
 
 	}
 	~Stats()
@@ -578,8 +602,7 @@ public:
 
 		this->window->draw(this->background_image);
 		this->render_stat_text();
-		this->window->draw(this->title_s);
-		this->window->draw(this->go_back_image);
+		this->render_images();
 
 		this->window->display();
 	}
@@ -918,10 +941,7 @@ private:
 	Sprite coin;
 	std::vector<Sprite> coins;
 
-	
 	unsigned int chances = 3;
-
-	
 
 	//Obstacles
 
@@ -1112,7 +1132,6 @@ private:
 		}
 	}
 
-
 	//window closing event
 
 	void pollEvents()
@@ -1177,7 +1196,6 @@ private:
 		this->road_image.setPosition(Vector2f(0.f, 150.f));
 	}
 
-	
 	
 public:
 

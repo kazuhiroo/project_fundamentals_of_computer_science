@@ -9,6 +9,8 @@ int main()
 
     //data
 
+    string nickname;
+
     ifstream h_txt;
     ofstream h1_txt;
 
@@ -65,6 +67,9 @@ int main()
 
             if (highscore < gra->get_points())
             {
+                cout << endl << "CONGRATULATIONS! NEW HIGHSCORE!" << endl;
+                cout << "Please, enter your nickname: ";
+
                 switch (car_chosen)
                 {
                     case 1: h1_txt.open("stats_ferrari.txt", ios::in); break;
