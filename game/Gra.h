@@ -4,6 +4,7 @@
 #include "Gra.cpp"
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 #include <sstream>
 #include <vector>
 #include <cmath>
@@ -19,8 +20,9 @@
 using namespace sf;
 
 
+
 /*
-	User Interface windows classes sucha as main menu 
+	User Interface windows classes such as main menu 
 	and stats window with the saved highscore (futurably)
 */
 
@@ -380,13 +382,15 @@ private:
 
 	std::ifstream s1_txt, s2_txt, s3_txt;
 
-	int score1, score2, score3;
+	std::string score1, score2, score3;
+	std::string nick1, nick2, nick3;
 
 	//Text, background and buttons
 	Texture bg,gob,fr,f1,mi;
 
 	Text title_s;
 	Text stats_text_fer, stats_text_f1, stats_text_m;
+	Text nick_text_fer, nick_text_f1, nick_text_m;
 
 	Sprite ferrari_image, f1_image, miami_image, background_image, go_back_image;
 
@@ -398,7 +402,6 @@ private:
 	//Bool exit
 
 	bool esc_s = false;
-
 
 
 	//FUNCTIONS
@@ -416,39 +419,100 @@ private:
 		this->title_s.setPosition(Vector2f(300.f, 50.f));
 	}
 
-
 	//getting stats
 
 	void get_stats_from_file()
 	{
+		std::string line;
+		int line_nr = 1;
+
 		s1_txt.open("stats_ferrari.txt", std::ios::in);
-		s1_txt >> this->score1;
-
 		s2_txt.open("stats_f1.txt", std::ios::in);
-		s2_txt >> this->score2;
-
 		s3_txt.open("stats_miami.txt", std::ios::in);
-		s3_txt >> this->score3;
+
+		while (getline(s1_txt, line))
+		{
+			switch (line_nr)
+			{
+			case 1:
+				this->score1 = line;
+				break;
+			case 2:
+				this->nick1 = line;
+				break;
+			}
+
+			line_nr++;
+		}
+		s1_txt.close();
+		line_nr = 1;
+
+		while (getline(s2_txt, line))
+		{
+			switch (line_nr)
+			{
+			case 1:
+				this->score2 = line;
+				break;
+			case 2:
+				this->nick2 = line;
+				break;
+			}
+
+			line_nr++;
+		}
+		s2_txt.close();
+		line_nr = 1;
+
+
+		while (getline(s3_txt, line))
+		{
+			switch (line_nr)
+			{
+			case 1:
+				this->score3 = line;
+				break;
+			case 2:
+				this->nick3 = line;
+				break;
+			}
+
+			line_nr++;
+		}
+		s3_txt.close();
 	}
+
+	void show_nicks()
+	{
+		std::string n1 = "NICK: " + this->nick1;
+		std::string n2 = "NICK: " + this->nick2;
+		std::string n3 = "NICK: " + this->nick3;
+
+		this->nick_text_fer.setString(n1);
+		this->nick_text_fer.setPosition(Vector2f(50.f, 450.f));
+
+		this->nick_text_f1.setString(n2);
+		this->nick_text_f1.setPosition(Vector2f(300.f, 450.f));
+
+		this->nick_text_m.setString(n3);
+		this->nick_text_m.setPosition(Vector2f(550.f, 450.f));
+	}
+
 
 	void show_stats()
 	{
-		std::stringstream sts_fer,sts_f1, sts_mi;
-		sts_fer << "HIGHSCORE: " << this->score1;
-		sts_f1	<< "HIGHSCORE: " << this->score2;
-		sts_mi  << "HIGHSCORE: " << this->score3;
+		std::string s1 = "HIGHSCORE: " + this->score1;
+		std::string s2 = "HIGHSCORE: " + this->score2;
+		std::string s3 = "HIGHSCORE: " + this->score3;
 
-		
-		this->stats_text_fer.setString(sts_fer.str());
+		this->stats_text_fer.setString(s1);
 		this->stats_text_fer.setPosition(Vector2f(50.f, 400.f));
 
-		this->stats_text_f1.setString(sts_f1.str());
+		this->stats_text_f1.setString(s2);
 		this->stats_text_f1.setPosition(Vector2f(300.f, 400.f));
 
-		this->stats_text_m.setString(sts_mi.str());
-		this->stats_text_m.setPosition(Vector2f(540.f, 400.f));
-
-		this->set_font_size();
+		this->stats_text_m.setString(s3);
+		this->stats_text_m.setPosition(Vector2f(550.f, 400.f));
 	}
 
 	void set_font_size()
@@ -456,10 +520,18 @@ private:
 		this->stats_text_fer.setFont(this->font);
 		this->stats_text_f1.setFont(this->font);
 		this->stats_text_m.setFont(this->font);
+		
+		this->nick_text_fer.setFont(this->font);
+		this->nick_text_f1.setFont(this->font);
+		this->nick_text_m.setFont(this->font);
 
 		this->stats_text_fer.setCharacterSize(20.f);
 		this->stats_text_f1.setCharacterSize(20.f);
 		this->stats_text_m.setCharacterSize(20.f);
+
+		this->nick_text_fer.setCharacterSize(20.f);
+		this->nick_text_f1.setCharacterSize(20.f);
+		this->nick_text_m.setCharacterSize(20.f);
 	}
 
 	void render_stat_text()
@@ -467,6 +539,13 @@ private:
 		this->window->draw(this->stats_text_fer);
 		this->window->draw(this->stats_text_f1);
 		this->window->draw(this->stats_text_m);
+	}
+
+	void render_nick_text()
+	{
+		this->window->draw(this->nick_text_fer);
+		this->window->draw(this->nick_text_f1);
+		this->window->draw(this->nick_text_m);
 	}
 
 	//textures n sprites
@@ -500,13 +579,13 @@ private:
 
 	void render_images()
 	{
+		this->window->draw(this->background_image);
 		this->window->draw(this->title_s);
 		this->window->draw(this->go_back_image);
 		this->window->draw(this->ferrari_image);
 		this->window->draw(this->f1_image);
 		this->window->draw(this->miami_image);
 	}
-
 
 
 	void pollEvents()
@@ -528,12 +607,16 @@ public:
 		this->window->setFramerateLimit(144);
 		this->window->setVerticalSyncEnabled(false);
 
-		//font
+		//text
 
 		this->font.loadFromFile("Fonts/PixelEmulator-xq08.ttf");
 		this->show_title();
+		
 		this->get_stats_from_file();
+		
+		this->set_font_size();
 		this->show_stats();
+		this->show_nicks();
 
 		//textures
 
@@ -541,9 +624,9 @@ public:
 		this->create_images();
 
 		this->go_back_image.setPosition(Vector2f(10.f, 20.f));
-		this->ferrari_image.setPosition(Vector2f(90.f, 350.f));
-		this->f1_image.setPosition(Vector2f(340.f, 350.f));
-		this->miami_image.setPosition(Vector2f(560.f, 350.f));
+		this->ferrari_image.setPosition(Vector2f(100.f, 350.f));
+		this->f1_image.setPosition(Vector2f(350.f, 350.f));
+		this->miami_image.setPosition(Vector2f(580.f, 350.f));
 
 	}
 	~Stats()
@@ -599,18 +682,14 @@ public:
 	void render_stats()
 	{
 		this->window->clear();
-
-		this->window->draw(this->background_image);
-		this->render_stat_text();
+		
 		this->render_images();
-
+		this->render_stat_text();
+		this->render_nick_text();
 		this->window->display();
 	}
 
 };
-
-
-
 
 
 /*

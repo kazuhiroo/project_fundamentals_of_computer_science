@@ -3,16 +3,33 @@
 using namespace sf;
 using namespace std;
 
+string nickname;
+bool good_nick = false;
+
+void enter_nick()
+{
+    cin >> nickname;
+    if (nickname.size() > 6)
+    {
+        cout << "Your nickname must not have more than 6 characters. Please try again." << endl;
+    }
+    else
+    {
+        good_nick = true;
+    }
+}
+
+
 int main()
 {
     srand(time(NULL));
 
     //data
 
-    string nickname;
+  
 
     ifstream h_txt;
-    ofstream h1_txt;
+    ofstream h1_txt, n_stats;
 
     int car_chosen = 1;
     int highscore=0;
@@ -68,7 +85,14 @@ int main()
             if (highscore < gra->get_points())
             {
                 cout << endl << "CONGRATULATIONS! NEW HIGHSCORE!" << endl;
-                cout << "Please, enter your nickname: ";
+                
+               do
+                {
+                    cout << "Please, enter your nickname: ";
+                    enter_nick();
+                }
+                while (good_nick == false);
+
 
                 switch (car_chosen)
                 {
@@ -79,10 +103,12 @@ int main()
                     case 3: h1_txt.open("stats_miami.txt", ios::in); break;
                 }
 
-                h1_txt << gra->get_points();
+                h1_txt << gra->get_points() << std::endl << nickname;
 
                 h1_txt.close();
             }
+
+            std::cout << endl;
 
             delete gra;
         }
