@@ -50,7 +50,14 @@ int main()
            //getting data from txt file and checking 
            //the highscore after the game
 
-           h_txt.open("stats.txt", ios::in);
+            switch (car_chosen)
+            {
+                case 1: h_txt.open("stats_ferrari.txt", ios::out); break;
+
+                case 2: h_txt.open("stats_f1.txt", ios::out); break;
+
+                case 3: h_txt.open("stats_miami.txt", ios::out); break;
+            }
 
            h_txt >> highscore;
 
@@ -58,7 +65,14 @@ int main()
 
             if (highscore < gra->get_points())
             {
-                h1_txt.open("stats.txt", ios::in);
+                switch (car_chosen)
+                {
+                    case 1: h1_txt.open("stats_ferrari.txt", ios::in); break;
+
+                    case 2: h1_txt.open("stats_f1.txt", ios::in); break;
+
+                    case 3: h1_txt.open("stats_miami.txt", ios::in); break;
+                }
 
                 h1_txt << gra->get_points();
 

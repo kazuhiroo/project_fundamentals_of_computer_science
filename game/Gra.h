@@ -44,7 +44,9 @@ private:
 
 	Text title;
 	Text text_car;
+
 	//buttons textures & sprites
+
 	Texture bg;
 	Sprite background_image;
 
@@ -58,12 +60,8 @@ private:
 
 	//cars textures & sprites
 
-	Texture f1;
-	Texture f12;
-	Texture mi;
-	Texture mi2;
-	Texture fer;
-	Texture fer2;
+	Texture f1, fer, mi;
+	Texture f12, mi2, fer2;
 	
 	Sprite f1_image;
 	Sprite miami_image;
@@ -86,7 +84,6 @@ private:
 			}
 		}
 	}
-
 	
 	//text function
 
@@ -104,6 +101,7 @@ private:
 	//TEXTURES AND SPRITES
 
 	//load functions
+
 	void load_buttons_textures()
 	{
 		this->pl.loadFromFile("Bg/play.png");
@@ -380,17 +378,18 @@ private:
 	
 	//getting data from txt
 
-	std::ifstream s_txt;
+	std::ifstream s1_txt, s2_txt, s3_txt;
 
 	int score1, score2, score3;
 
 	//Text, background and buttons
-	Texture bg;
+	Texture bg,gob,fr,f1,mi;
+
 	Text title_s;
-	Text stats_text;
-	Texture gob;
-	Sprite go_back_image;
-	Sprite background_image;
+	Text stats_text_fer, stats_text_f1, stats_text_m;
+
+	Sprite ferrari_image, f1_image, miami_image, background_image, go_back_image;
+
 	Font font;
 	//Interaction with mouse
 
@@ -399,6 +398,8 @@ private:
 	//Bool exit
 
 	bool esc_s = false;
+
+
 
 	//FUNCTIONS
 	
@@ -420,21 +421,53 @@ private:
 
 	void get_stats_from_file()
 	{
-		s_txt.open("stats.txt", std::ios::in);
-		s_txt >> this->score1;
+		s1_txt.open("stats_ferrari.txt", std::ios::in);
+		s1_txt >> this->score1;
+
+		s2_txt.open("stats_f1.txt", std::ios::in);
+		s2_txt >> this->score2;
+
+		s3_txt.open("stats_miami.txt", std::ios::in);
+		s3_txt >> this->score3;
 	}
 
 	void show_stats()
 	{
-		std::stringstream sts;
-		sts << "HIGHSCORE: " << this->score1;
+		std::stringstream sts_fer,sts_f1, sts_mi;
+		sts_fer << "HIGHSCORE: " << this->score1;
+		sts_f1	<< "HIGHSCORE: " << this->score2;
+		sts_mi  << "HIGHSCORE: " << this->score3;
 
-		this->stats_text.setFont(this->font);
-		this->stats_text.setString(sts.str());
-		this->stats_text.setPosition(Vector2f(250.f, 150.f));
-		this->stats_text.setCharacterSize(30.f);
+		
+		this->stats_text_fer.setString(sts_fer.str());
+		this->stats_text_fer.setPosition(Vector2f(50.f, 400.f));
+
+		this->stats_text_f1.setString(sts_f1.str());
+		this->stats_text_f1.setPosition(Vector2f(300.f, 400.f));
+
+		this->stats_text_m.setString(sts_mi.str());
+		this->stats_text_m.setPosition(Vector2f(540.f, 400.f));
+
+		this->set_font_size();
 	}
 
+	void set_font_size()
+	{
+		this->stats_text_fer.setFont(this->font);
+		this->stats_text_f1.setFont(this->font);
+		this->stats_text_m.setFont(this->font);
+
+		this->stats_text_fer.setCharacterSize(20.f);
+		this->stats_text_f1.setCharacterSize(20.f);
+		this->stats_text_m.setCharacterSize(20.f);
+	}
+
+	void render_stat_text()
+	{
+		this->window->draw(this->stats_text_fer);
+		this->window->draw(this->stats_text_f1);
+		this->window->draw(this->stats_text_m);
+	}
 
 	//textures n sprites
 
@@ -442,7 +475,9 @@ private:
 	{
 		this->gob.loadFromFile("Bg/back.png");
 		this->bg.loadFromFile("Bg/bg.png");
-		
+		this->fr.loadFromFile("Bg/ferrari.png");
+		this->f1.loadFromFile("Bg/F1.png");
+		this->mi.loadFromFile("Bg/miami.png");
 	}
 
 	void create_images()
@@ -450,7 +485,6 @@ private:
 		this->go_back_image.setTexture(this->gob);
 		this->background_image.setTexture(this->bg);
 		this->go_back_image.scale(0.2f, 0.2f);
-
 	}
 
 	void pollEvents()
@@ -532,10 +566,10 @@ public:
 
 	void update_stats()
 	{
-			this->pollEvents();
-			this->get_working_s();
-			this->get_mouse_position();
-			this->go_back();
+		this->pollEvents();
+		this->get_working_s();
+		this->get_mouse_position();
+		this->go_back();
 	}
 
 	void render_stats()
@@ -543,7 +577,7 @@ public:
 		this->window->clear();
 
 		this->window->draw(this->background_image);
-		this->window->draw(this->stats_text);
+		this->render_stat_text();
 		this->window->draw(this->title_s);
 		this->window->draw(this->go_back_image);
 
@@ -560,7 +594,7 @@ public:
 	Main Car class with a
 	Polymorphy classes of the Car class
 	- Ferrari - easy
-	- Ferrari - medium
+	- F1 - medium
 	- Hotline Miami - easter egg - elite
 */
 
@@ -620,7 +654,8 @@ public:
 	{}
 
 
-	/*			   ^
+	/*	
+				   ^
 		KEYBOARD <   >
 				   v
 	*/
@@ -894,6 +929,8 @@ private:
 	Sprite obstacle;
 	std::vector<Sprite> obstacles;
 
+	float game_obj_speed;
+	float game_cns_speed;
 
 	int num_of_objects = 0;
 	int option;
@@ -903,8 +940,9 @@ private:
 	Time spawn_time;
 	Clock clock;
 
-	//Clock game_clock;
-	//Time game_time = Time::Zero;
+	Clock game_clock;
+	Time game_time = Time::Zero;
+	Time progress_time = seconds(6.f);
 
 	//Background
 
@@ -961,7 +999,7 @@ private:
 		}
 	}
 
-	//Coins+obstacles functions
+	//Coins+obstacles and game functions
 
 	void set_objects()
 	{
@@ -979,6 +1017,16 @@ private:
 			this->obstacles.push_back(this->obstacle);
 			this->coins.push_back(this->coin);
 			num_of_objects++;
+		}
+	}
+
+	void progress()
+	{
+		if (this->game_time >= this->progress_time)
+		{
+			game_time = Time::Zero;
+			this->game_obj_speed += 0.1f;
+			this->game_cns_speed += 0.1f;
 		}
 	}
 
@@ -1006,7 +1054,7 @@ private:
 	{
 		for (int i = 0; i < coins.size(); i++)
 		{
-			this->coins[i].setPosition(Vector2f(this->coins[i].getPosition().x - this->gracz->get_cns_speed(), this->coins[i].getPosition().y));
+			this->coins[i].setPosition(Vector2f(this->coins[i].getPosition().x - this->game_cns_speed, this->coins[i].getPosition().y));
 			if (this->coins[i].getPosition().x <= 0.f)
 			{
 				this->coins.erase(this->coins.begin() + i);
@@ -1030,14 +1078,14 @@ private:
 
 		switch (option)
 		{
-		case 0:
-			this->obstacle.setPosition(800.f, static_cast<float>(rand() % 141 + 160));
-			break;
-		case 1:
-			this->obstacle.setPosition(800.f, static_cast<float>(rand() % 96 + 245));
-			break;
-		default:
-			break;
+			case 0:
+				this->obstacle.setPosition(800.f, static_cast<float>(rand() % 141 + 160));
+				break;
+			case 1:
+				this->obstacle.setPosition(800.f, static_cast<float>(rand() % 96 + 245));
+				break;
+			default:
+				break;
 		}
 
 		this->obstacle.setTexture(this->obs);
@@ -1047,7 +1095,7 @@ private:
 	{
 		for (int i = 0; i < obstacles.size(); i++)
 		{
-			this->obstacles[i].setPosition(Vector2f(this->obstacles[i].getPosition().x - this->gracz->get_obj_speed(), this->obstacles[i].getPosition().y));
+			this->obstacles[i].setPosition(Vector2f(this->obstacles[i].getPosition().x - this->game_obj_speed, this->obstacles[i].getPosition().y));
 
 			if (this->obstacles[i].getPosition().x <= 0.f)
 			{
@@ -1063,7 +1111,6 @@ private:
 			this->window->draw(obstacles_objects);
 		}
 	}
-
 
 
 	//window closing event
@@ -1155,9 +1202,14 @@ public:
 		
 		
 
-		//Clock reset and its settings
+		//Clock reset and game-start settings
 
 		time += clock.restart();
+
+		game_time += clock.restart();
+
+		this->game_obj_speed = this->gracz->get_obj_speed();
+		this->game_cns_speed = this->gracz->get_cns_speed();
 
 		spawn_time = seconds(this->gracz->get_speed());
 
@@ -1224,9 +1276,11 @@ public:
 	void update()
 	{
 		time += clock.restart();
-
+		game_time += game_clock.restart();
+		
 		this->pollEvents();
 		this->show_points();
+		this->progress();
 
 		//Objects spawn
 
