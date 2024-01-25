@@ -26,8 +26,6 @@ int main()
 
     //data
 
-  
-
     ifstream h_txt;
     ofstream h1_txt, n_stats;
 

@@ -14,7 +14,6 @@
 #include <SFML/Network.hpp>
 #include <SFML/Audio.hpp>
 
-
 using namespace sf;
 
 /*
@@ -899,7 +898,7 @@ public:
 	void upload_texture()
 	{
 		this->char_image.setTexture(this->image1);
-		this->char_image.scale(0.2f, 0.2f);
+		this->char_image.scale(0.25f, 0.25f);
 	}
 };
 
@@ -908,7 +907,7 @@ class Ferrari :public Car
 {
 
 public:
-	Ferrari(float t_speed = 2.f, float r_speed = 0.75f, float sp = 2.f, float o_speed = 2.f, float c_speed = 2.2f, float spc = 150.f)
+	Ferrari(float t_speed = 2.f, float r_speed = 0.65f, float sp = 2.f, float o_speed = 2.f, float c_speed = 2.2f, float spc = 200.f)
 	{
 		cns_speed = c_speed;
 		speed = sp;
@@ -935,7 +934,7 @@ public:
 	void upload_texture()
 	{
 		this->char_image.setTexture(this->image1);
-		this->char_image.scale(0.2f, 0.2f);
+		this->char_image.scale(0.25f, 0.25f);
 	}
 };
 
