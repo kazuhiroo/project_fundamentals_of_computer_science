@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-
 #include "Gra.cpp"
 #include <iostream>
 #include <fstream>
@@ -8,7 +7,6 @@
 #include <sstream>
 #include <vector>
 #include <cmath>
-
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -18,8 +16,6 @@
 
 
 using namespace sf;
-
-
 
 /*
 	User Interface windows classes such as main menu 
@@ -702,7 +698,6 @@ public:
 
 
 //MAIN CAR CLASS
-
 class Car
 {
 protected:
@@ -913,7 +908,7 @@ class Ferrari :public Car
 {
 
 public:
-	Ferrari(float t_speed = 2.2f, float r_speed = 0.6f, float sp = 1.f, float o_speed = 3.5f, float c_speed = 3.5f, float spc = 200.f)
+	Ferrari(float t_speed = 2.f, float r_speed = 0.75f, float sp = 2.f, float o_speed = 2.f, float c_speed = 2.2f, float spc = 150.f)
 	{
 		cns_speed = c_speed;
 		speed = sp;
@@ -921,7 +916,6 @@ public:
 		turn_speed = t_speed;
 		rotation_speed = r_speed;
 		space = spc;
-
 
 		this->load_texture();
 		this->upload_texture();
@@ -949,7 +943,7 @@ public:
 class Miami :public Car
 {
 public:
-	Miami(float t_speed = 2.2f, float r_speed = 0.55f, float sp = 1.f, float o_speed = 3.5f, float c_speed = 3.5f, float spc = 200.f)
+	Miami(float t_speed = 2.5f, float r_speed = 0.55f, float sp = 1.f, float o_speed = 3.5f, float c_speed = 3.7f, float spc = 200.f)
 	{
 		cns_speed = c_speed;
 		speed = sp;
@@ -1124,8 +1118,8 @@ private:
 		if (this->game_time >= this->progress_time)
 		{
 			game_time = Time::Zero;
-			this->game_obj_speed += 0.1f;
-			this->game_cns_speed += 0.1f;
+			this->game_obj_speed += 0.15f;
+			this->game_cns_speed += 0.15f;
 		}
 	}
 
